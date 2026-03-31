@@ -37,6 +37,10 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, app: "blog-app" });
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, app: "blog-app" });
+});
+
 app.use("/api/admin", adminRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/me", meRoutes);
