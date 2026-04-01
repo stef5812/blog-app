@@ -37,7 +37,7 @@ export default function SiteHeader({ me, setMe }) {
 
       setOpen(false);
       setLoggingOut(false);
-      window.location.href = "/";
+      window.location.href = "/blog-app/";
     }
   }
 
