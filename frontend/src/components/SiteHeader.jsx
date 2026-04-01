@@ -7,6 +7,9 @@ export default function SiteHeader({ me, setMe }) {
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
+  console.log("SiteHeader me:", me);
+  console.log("SiteHeader appRoles:", me?.appRoles);
+
   const isLoggedIn = !!me?.user;
 
   const isAdmin = me?.appRoles?.some(
