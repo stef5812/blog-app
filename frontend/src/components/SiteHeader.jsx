@@ -22,24 +22,24 @@ export default function SiteHeader({ me, setMe }) {
     ? `http://localhost:5173/login?from=blog-app&next=${encodeURIComponent(devNext)}`
     : `https://auth.stefandodds.ie/login?from=blog-app&next=${encodeURIComponent(prodNext)}`;
 
-  async function handleLogout() {
-    setLoggingOut(true);
-
-    try {
-      await fetch("/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      if (setMe) setMe(null);
-
-      setOpen(false);
-      setLoggingOut(false);
-      window.location.href = "/blog-app/";
+    async function handleLogout() {
+      setLoggingOut(true);
+    
+      try {
+        await fetch("/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (error) {
+        console.error("Logout failed:", error);
+      } finally {
+        if (setMe) setMe(null);
+    
+        setOpen(false);
+        setLoggingOut(false);
+        window.location.href = loginHref;
+      }
     }
-  }
 
   return (
     <header className="topbar">
