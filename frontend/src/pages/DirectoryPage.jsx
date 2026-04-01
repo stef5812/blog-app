@@ -18,12 +18,13 @@ export default function DirectoryPage() {
       try {
         const [auth, publicBlogs] = await Promise.all([
           authMe().catch(() => null),
-          apiFetch("/api/public/blogs"),
+          apiFetch("/public/blogs").catch(() => []),
         ]);
 
         if (!ignore) {
           setMe(auth || null);
           setBlogs(Array.isArray(publicBlogs) ? publicBlogs : []);
+          setErr("");
         }
       } catch (error) {
         if (!ignore) {
@@ -126,7 +127,7 @@ export default function DirectoryPage() {
 
                   <div className="mt-6">
                     <Link
-                      to={`/blog/${blog.username}`}
+                      to={`/@${blog.username}`}
                       className="btn-primary bg-lime-600 hover:bg-lime-700"
                     >
                       Open blog

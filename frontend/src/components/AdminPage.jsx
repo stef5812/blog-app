@@ -24,7 +24,7 @@ export default function AdminPage() {
     setError("");
 
     try {
-      const data = await apiFetch("/api/admin/blogs", {
+      const data = await apiFetch("/admin/blogs", {
         credentials: "include",
       });
 
@@ -61,7 +61,7 @@ export default function AdminPage() {
     setError("");
 
     try {
-      await apiFetch(`/api/admin/posts/${postId}`, {
+      await apiFetch(`/admin/posts/${postId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -92,7 +92,7 @@ export default function AdminPage() {
     setError("");
 
     try {
-      await apiFetch(`/api/admin/blogs/${userId}`, {
+      await apiFetch(`/admin/blogs/${userId}`, {
         method: "DELETE",
         credentials: "include",
       });

@@ -34,11 +34,11 @@ export default function SettingsPage() {
 
         if (!auth?.user) {
           window.location.href =
-            "/auth/login?from=blog-app&next=http://localhost:5176/dashboard/settings";
+            "/auth/login?from=blog-app&next=http://localhost:5176/blog-app/dashboard/settings";
           return;
         }
 
-        const profile = await apiFetch("/api/me/profile").catch(() => null);
+        const profile = await apiFetch("/me/profile").catch(() => null);
 
         if (!ignore) {
           setMe(auth);
@@ -89,7 +89,7 @@ export default function SettingsPage() {
     setErr("");
   
     try {
-      const savedProfile = await apiFetch("/api/me/profile", {
+      const savedProfile = await apiFetch("/me/profile", {
         method: "POST",
         body: JSON.stringify(form),
       });

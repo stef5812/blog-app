@@ -38,8 +38,8 @@ export default function PublicProfilePage() {
 
         const [auth, profileData, postsData] = await Promise.all([
           authMe().catch(() => null),
-          apiFetch(`/api/public/blogs/${cleanUsername}`),
-          apiFetch(`/api/public/blogs/${cleanUsername}/posts`).catch(() => []),
+          apiFetch(`/public/blogs/${cleanUsername}`),
+          apiFetch(`/public/blogs/${cleanUsername}/posts`).catch(() => []),
         ]);
 
         if (ignore) return;

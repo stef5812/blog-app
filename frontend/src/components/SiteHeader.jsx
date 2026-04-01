@@ -15,8 +15,8 @@ export default function SiteHeader({ me, setMe }) {
       (r.role === "ADMIN" || r.role === "SUPERADMIN")
   );
 
-  const devNext = "http://localhost:5176/dashboard";
-  const prodNext = "https://blog.stefandodds.ie/dashboard";
+  const devNext = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
+  const prodNext = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
 
   const loginHref = import.meta.env.DEV
     ? `http://localhost:5173/login?from=blog-app&next=${encodeURIComponent(devNext)}`

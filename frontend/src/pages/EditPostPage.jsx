@@ -55,7 +55,6 @@ export default function EditPostPage() {
     extensions: [
       StarterKit,
       Image,
-      Underline,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
@@ -86,7 +85,7 @@ export default function EditPostPage() {
 
         if (!auth?.user) {
           window.location.href = `/auth/login?from=blog-app&next=${encodeURIComponent(
-            `${window.location.origin}/dashboard`
+            `${window.location.origin}${import.meta.env.BASE_URL}dashboard`
           )}`;
           return;
         }
@@ -94,7 +93,7 @@ export default function EditPostPage() {
         if (!ignore) setMe(auth);
 
         if (!isNew) {
-          const posts = await apiFetch("/api/me/posts");
+          const posts = await apiFetch("/me/posts");
           const post = posts.find((p) => p.id === id);
 
           if (post && !ignore) {
@@ -146,7 +145,7 @@ export default function EditPostPage() {
 
     try {
       setErr("");
-      const uploaded = await apiUpload("/api/uploads/image", file);
+      const uploaded = await apiUpload("/uploads/image", file);
 
       editor
         ?.chain()
@@ -181,7 +180,7 @@ export default function EditPostPage() {
 
     try {
       setErr("");
-      const uploaded = await apiUpload("/api/uploads/image", file);
+      const uploaded = await apiUpload("/uploads/image", file);
 
       setForm((prev) => ({
         ...prev,
@@ -210,7 +209,7 @@ export default function EditPostPage() {
       };
 
       if (isNew) {
-        const created = await apiFetch("/api/me/posts", {
+        const created = await apiFetch("/me/posts", {
           method: "POST",
           body: JSON.stringify(payload),
         });
@@ -220,7 +219,7 @@ export default function EditPostPage() {
         return;
       }
 
-      await apiFetch(`/api/me/posts/${id}`, {
+      await apiFetch(`/me/posts/${id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
       });

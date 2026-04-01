@@ -1,7 +1,19 @@
 // frontend/src/lib/api.js
 
+const APP_BASE = import.meta.env.DEV ? "" : "/blog-app";
+const API_BASE = `${APP_BASE}/api`;
+const UPLOAD_BASE = `${APP_BASE}/uploads`;
+const AUTH_BASE = import.meta.env.DEV ? "/auth" : "https://auth.stefandodds.ie/auth";
+
+function buildUrl(base, path) {
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export async function apiFetch(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(buildUrl(API_BASE, path), {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -23,7 +35,7 @@ export async function apiFetch(path, options = {}) {
 }
 
 export async function authMe() {
-  const response = await fetch("/auth/me", {
+  const response = await fetch(`${AUTH_BASE}/me`, {
     credentials: "include",
   });
 
@@ -47,7 +59,7 @@ export async function apiUpload(path, file) {
   const formData = new FormData();
   formData.append("image", file);
 
-  const res = await fetch(path, {
+  const res = await fetch(buildUrl(API_BASE, path), {
     method: "POST",
     credentials: "include",
     body: formData,

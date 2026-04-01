@@ -204,7 +204,7 @@ export default function PublicPostPage() {
         setErr("");
 
         const result = await apiFetch(
-          `/api/public/blogs/${cleanUsername}/posts/${slug}`
+          `/public/blogs/${cleanUsername}/posts/${slug}`
         );
 
         if (!ignore) setData(result);

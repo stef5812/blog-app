@@ -21,7 +21,7 @@ export default function DashboardPage() {
 
         if (!auth?.user) {
           window.location.href =
-            "/auth/login?from=blog-app&next=http://localhost:5176/dashboard";
+            "/auth/login?from=blog-app&next=http://localhost:5176/blog-app/dashboard";
           return;
         }
 
@@ -29,7 +29,7 @@ export default function DashboardPage() {
           setMe(auth);
         }
 
-        const profileData = await apiFetch("/api/me/profile").catch(() => null);
+        const profileData = await apiFetch("/me/profile").catch(() => null);
 
         if (!ignore) {
           setProfile(profileData || null);
@@ -42,7 +42,7 @@ export default function DashboardPage() {
           return;
         }
 
-        const postsData = await apiFetch("/api/me/posts").catch(() => []);
+        const postsData = await apiFetch("/me/posts").catch(() => []);
 
         if (!ignore) {
           setPosts(Array.isArray(postsData) ? postsData : []);

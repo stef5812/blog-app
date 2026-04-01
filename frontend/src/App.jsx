@@ -12,7 +12,7 @@ import DirectoryPage from "./pages/DirectoryPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/blog-app">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/directory" element={<DirectoryPage />} />
