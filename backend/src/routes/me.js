@@ -14,11 +14,38 @@ router.get("/profile", async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const profile = await prisma.blogProfile.findUnique({
+    let profile = await prisma.blogProfile.findUnique({
       where: { userId },
     });
 
-    return res.json(profile || null);
+    if (!profile) {
+      const baseUsername =
+        req.user.displayName?.trim() ||
+        req.user.email?.split("@")[0] ||
+        `user-${userId.slice(-6)}`;
+
+      let username = slugify(baseUsername) || `user-${userId.slice(-6)}`;
+      let suffix = 1;
+
+      while (await prisma.blogProfile.findUnique({ where: { username } })) {
+        suffix += 1;
+        username = `${slugify(baseUsername) || `user-${userId.slice(-6)}`}-${suffix}`;
+      }
+
+      profile = await prisma.blogProfile.create({
+        data: {
+          userId,
+          username,
+          displayName: req.user.displayName || "",
+          bio: "",
+          siteTitle: "",
+          siteDescription: "",
+          themeAccent: "#65a30d",
+        },
+      });
+    }
+
+    return res.json(profile);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to load profile" });

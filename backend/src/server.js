@@ -31,6 +31,11 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  console.log("INCOMING:", req.method, req.url);
+  next();
+});
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/health", (req, res) => {
