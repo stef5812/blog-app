@@ -8,6 +8,8 @@ import { getAuthMe } from "../lib/auth.js";
 
 const router = express.Router();
 
+const publicUploadsBase = process.env.PUBLIC_UPLOADS_BASE || "";
+
 const uploadRoot = path.join(process.cwd(), "uploads", "blog");
 fs.mkdirSync(uploadRoot, { recursive: true });
 
@@ -84,7 +86,7 @@ router.post("/image", requireAuth, (req, res) => {
 
     return res.json({
       ok: true,
-      url: `/uploads/blog/${userId}/${req.file.filename}`,
+      url: `${publicUploadsBase}/uploads/blog/${userId}/${req.file.filename}`,
       filename: req.file.filename,
       mimetype: req.file.mimetype,
       size: req.file.size,
