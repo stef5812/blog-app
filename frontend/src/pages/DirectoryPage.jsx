@@ -127,7 +127,7 @@ export default function DirectoryPage() {
 
                   <div className="mt-6">
                     <Link
-                      to={`/@${blog.username}`}
+                      to={`/blog/${blog.username}`}
                       className="btn-primary bg-lime-600 hover:bg-lime-700"
                     >
                       Open blog
