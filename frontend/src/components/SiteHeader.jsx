@@ -204,7 +204,7 @@ export default function SiteHeader({ me, setMe }) {
               Directory
             </Link>
 
-            <LinksDropdown />
+            
 
             {isLoggedIn ? (
               <>
@@ -231,6 +231,8 @@ export default function SiteHeader({ me, setMe }) {
                     Admin
                   </Link>
                 )}
+
+                <LinksDropdown />
 
                 <button
                   type="button"

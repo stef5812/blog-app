@@ -22,8 +22,14 @@ export default function DirectoryPage() {
         ]);
 
         if (!ignore) {
+          const blogList = Array.isArray(publicBlogs) ? publicBlogs : [];
+
+          const blogsWithPosts = blogList.filter(
+            (blog) => Number(blog.postCount || 0) > 0
+          );
+
           setMe(auth || null);
-          setBlogs(Array.isArray(publicBlogs) ? publicBlogs : []);
+          setBlogs(blogsWithPosts);
           setErr("");
         }
       } catch (error) {
@@ -81,9 +87,12 @@ export default function DirectoryPage() {
 
           {!loading && !err && blogs.length === 0 && (
             <div className="card border-lime-100 p-6 sm:p-8">
-              <h2 className="text-xl font-semibold text-slate-950">No public blogs yet</h2>
+              <h2 className="text-xl font-semibold text-slate-950">
+                No public blogs yet
+              </h2>
               <p className="mt-3 text-slate-600">
-                No one has published a blog profile yet. You could be the first.
+                No blogs with published posts are available yet. You could be the
+                first.
               </p>
               <div className="mt-6">
                 <Link
@@ -108,7 +117,9 @@ export default function DirectoryPage() {
                       <h2 className="text-lg font-semibold text-slate-950">
                         {blog.siteTitle || blog.displayName || blog.username}
                       </h2>
-                      <p className="mt-1 text-sm text-slate-500">@{blog.username}</p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        @{blog.username}
+                      </p>
                     </div>
 
                     <span
@@ -122,7 +133,8 @@ export default function DirectoryPage() {
                   </p>
 
                   <div className="mt-5 text-sm text-slate-500">
-                    {blog.postCount} published post{blog.postCount === 1 ? "" : "s"}
+                    {blog.postCount} published post
+                    {blog.postCount === 1 ? "" : "s"}
                   </div>
 
                   <div className="mt-6">

@@ -151,37 +151,54 @@ export default function PublicProfilePage() {
                     No published posts yet.
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-4">
-                    {posts.map((post) => (
-                      <article
-                        key={post.id}
-                        className="rounded-2xl border border-slate-200 bg-white p-5"
-                      >
-                        <h3 className="text-lg font-semibold text-slate-950">
-                          {post.title}
-                        </h3>
+<div className="mt-6 space-y-4">
+  {posts.map((post) => (
+    <article
+      key={post.id}
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+    >
+      <div className="flex gap-4">
+        {post.coverImageUrl ? (
+          <Link
+            to={`/blog/${profile.username}/post/${post.slug}`}
+            className="shrink-0"
+          >
+            <img
+              src={post.coverImageUrl}
+              alt={post.title || "Post cover"}
+              className="h-24 w-24 rounded-xl border border-slate-200 object-cover sm:h-28 sm:w-28"
+            />
+          </Link>
+        ) : null}
 
-                        {post.excerpt && (
-                          <p className="mt-2 text-slate-600">{post.excerpt}</p>
-                        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold text-slate-950">
+            {post.title}
+          </h3>
 
-                        <div className="mt-4 flex items-center justify-between">
-                          <p className="text-sm text-slate-500">
-                            {post.publishedAt
-                              ? new Date(post.publishedAt).toLocaleDateString()
-                              : ""}
-                          </p>
+          {post.excerpt && (
+            <p className="mt-2 text-slate-600">{post.excerpt}</p>
+          )}
 
-                          <Link
-  to={`/blog/${profile.username}/post/${post.slug}`}
-  className="btn-primary bg-lime-600 hover:bg-lime-700"
->
-  Read post
-</Link>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              {post.publishedAt
+                ? new Date(post.publishedAt).toLocaleDateString()
+                : ""}
+            </p>
+
+            <Link
+              to={`/blog/${profile.username}/post/${post.slug}`}
+              className="btn-primary bg-lime-600 hover:bg-lime-700"
+            >
+              Read post
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
+  ))}
+</div>
                 )}
               </section>
             </>
