@@ -279,9 +279,7 @@ export default function DashboardPage() {
                     <h3 className="text-lg font-semibold text-slate-950">
                       Profile photo
                     </h3>
-                    <p className="mt-2 text-sm text-slate-600">
-                      Upload your own photo or choose one of the preset avatars.
-                    </p>
+
 
                     <div className="mt-4 flex justify-center">
                       <div className="h-28 w-28 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
@@ -299,84 +297,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={handleBrowseAvatar}
-                        className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
-                        disabled={avatarBusy}
-                      >
-                        {avatarBusy ? "Working..." : "Upload photo"}
-                      </button>
 
-                      <button
-                        type="button"
-                        onClick={handleSaveAvatar}
-                        className="btn-primary bg-lime-600 hover:bg-lime-700"
-                        disabled={avatarBusy}
-                      >
-                        Save photo
-                      </button>
 
-                      {avatarUrl && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAvatarUrl("");
-                            setAvatarMsg("Photo removed. Save settings to keep the change.");
-                            setErr("");
-                          }}
-                          className="btn-ghost"
-                          disabled={avatarBusy}
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
 
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarFileChange}
-                      className="hidden"
-                    />
-
-                    <div className="mt-6">
-                      <p className="text-sm font-medium text-slate-700">
-                        Choose a preset
-                      </p>
-
-                      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-                        {PRESET_AVATARS.map((url) => {
-                          const active = avatarUrl === url;
-
-                          return (
-                            <button
-                              key={url}
-                              type="button"
-                              onClick={() => handlePresetSelect(url)}
-                              className={`overflow-hidden rounded-2xl border bg-white ${
-                                active
-                                  ? "border-lime-500 ring-2 ring-lime-200"
-                                  : "border-slate-200"
-                              }`}
-                              title="Choose avatar"
-                            >
-                              <img
-                                src={url}
-                                alt="Preset avatar"
-                                className="h-16 w-full object-cover"
-                              />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {avatarMsg && (
-                      <p className="mt-4 text-sm text-slate-600">{avatarMsg}</p>
-                    )}
                   </div>
                 </div>
               </div>
