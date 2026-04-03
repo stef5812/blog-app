@@ -1,9 +1,21 @@
 // frontend/src/pages/DashboardPage.jsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch, authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
+
+const PRESET_AVATARS = [
+  "/blog-app/avatars/avatar_circle_0_0.png",
+  "/blog-app/avatars/avatar_circle_0_1.png",
+  "/blog-app/avatars/avatar_circle_0_2.png",
+  "/blog-app/avatars/avatar_circle_1_0.png",
+  "/blog-app/avatars/avatar_circle_1_1.png",
+  "/blog-app/avatars/avatar_circle_1_2.png",
+  "/blog-app/avatars/avatar_circle_2_0.png",
+  "/blog-app/avatars/avatar_circle_2_1.png",
+  "/blog-app/avatars/avatar_circle_2_2.png",
+];
 
 export default function DashboardPage() {
   const [me, setMe] = useState(null);
@@ -11,6 +23,12 @@ export default function DashboardPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState("");
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     let ignore = false;
@@ -33,6 +51,7 @@ export default function DashboardPage() {
 
         if (!ignore) {
           setProfile(profileData || null);
+          setAvatarUrl(profileData?.avatarUrl || "");
         }
 
         if (!profileData) {
@@ -64,6 +83,72 @@ export default function DashboardPage() {
       ignore = true;
     };
   }, []);
+
+  async function handlePresetSelect(url) {
+    setAvatarUrl(url);
+    setAvatarMsg("");
+  }
+
+  async function handleUploadChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setAvatarBusy(true);
+    setAvatarMsg("");
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/me/profile/avatar-upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Could not upload image.");
+      }
+
+      const data = await res.json();
+      if (!data?.url) {
+        throw new Error("Upload did not return an image URL.");
+      }
+
+      setAvatarUrl(data.url);
+      setAvatarMsg("Image uploaded. Save to keep it.");
+    } catch (error) {
+      setAvatarMsg(error.message || "Upload failed.");
+    } finally {
+      setAvatarBusy(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleSaveAvatar() {
+    if (!profile) return;
+
+    setAvatarBusy(true);
+    setAvatarMsg("");
+
+    try {
+      const updated = await apiFetch("/me/profile", {
+        method: "PUT",
+        body: JSON.stringify({
+          ...profile,
+          avatarUrl,
+        }),
+      });
+
+      setProfile(updated);
+      setAvatarUrl(updated?.avatarUrl || avatarUrl);
+      setAvatarMsg("Profile image saved.");
+    } catch (error) {
+      setAvatarMsg(error.message || "Could not save profile image.");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
 
   return (
     <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_28%,#ffffff_100%)]">
@@ -137,29 +222,122 @@ export default function DashboardPage() {
           {!loading && !err && profile && (
             <>
               <div className="mt-6 card border-lime-100 p-6 sm:p-8">
-                <h2 className="text-xl font-semibold text-slate-950">
-                  {profile.siteTitle || profile.displayName || "Your blog"}
-                </h2>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-slate-950">
+                      {profile.siteTitle || profile.displayName || "Your blog"}
+                    </h2>
 
-                <p className="mt-2 text-slate-600">
-                  {profile.username ? `@${profile.username}` : ""}
-                </p>
+                    <p className="mt-2 text-slate-600">
+                      {profile.username ? `@${profile.username}` : ""}
+                    </p>
 
-                {profile.siteDescription && (
-                  <p className="mt-4 text-slate-600">{profile.siteDescription}</p>
-                )}
+                    {profile.siteDescription && (
+                      <p className="mt-4 text-slate-600">{profile.siteDescription}</p>
+                    )}
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-  to={`/blog/${profile.username}`}
-  className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
->
-  View public blog
-</Link>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <Link
+                        to={`/blog/${profile.username}`}
+                        className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                      >
+                        View public blog
+                      </Link>
 
-                  <Link to="/dashboard/settings" className="btn-ghost">
-                    Edit settings
-                  </Link>
+                      <Link to="/dashboard/settings" className="btn-ghost">
+                        Edit settings
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-sm rounded-2xl border border-lime-100 bg-white p-5">
+                    <h3 className="text-lg font-semibold text-slate-950">
+                      Profile photo
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Upload your own image or pick one from the gallery.
+                    </p>
+
+                    <div className="mt-4 flex justify-center">
+                      <div className="h-28 w-28 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt="Profile preview"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                            No image
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                        disabled={avatarBusy}
+                      >
+                        {avatarBusy ? "Working..." : "Upload photo"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveAvatar}
+                        className="btn-primary bg-lime-600 hover:bg-lime-700"
+                        disabled={avatarBusy || !avatarUrl}
+                      >
+                        Save photo
+                      </button>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadChange}
+                      className="hidden"
+                    />
+
+                    <div className="mt-6">
+                      <p className="text-sm font-medium text-slate-700">
+                        Choose a preset
+                      </p>
+
+                      <div className="mt-3 grid grid-cols-4 gap-3">
+                        {PRESET_AVATARS.map((url) => {
+                          const active = avatarUrl === url;
+
+                          return (
+                            <button
+                              key={url}
+                              type="button"
+                              onClick={() => handlePresetSelect(url)}
+                              className={`overflow-hidden rounded-2xl border ${
+                                active
+                                  ? "border-lime-500 ring-2 ring-lime-200"
+                                  : "border-slate-200"
+                              }`}
+                              title="Choose avatar"
+                            >
+                              <img
+                                src={url}
+                                alt="Preset avatar"
+                                className="h-16 w-full object-cover"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {avatarMsg && (
+                      <p className="mt-4 text-sm text-slate-600">{avatarMsg}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -188,7 +366,9 @@ export default function DashboardPage() {
                               {post.title || "Untitled post"}
                             </h3>
                             <p className="mt-1 text-sm text-slate-500">
-                              {post.slug ? `/blog/${profile.username}/post/${post.slug}` : "No slug"}
+                              {post.slug
+                                ? `/blog/${profile.username}/post/${post.slug}`
+                                : "No slug"}
                             </p>
                             <p className="mt-2 text-sm text-slate-500">
                               Updated{" "}
@@ -208,11 +388,11 @@ export default function DashboardPage() {
 
                             {post.slug && (
                               <Link
-  to={`/blog/${profile.username}/post/${post.slug}`}
-  className="btn-ghost"
->
-  View
-</Link>
+                                to={`/blog/${profile.username}/post/${post.slug}`}
+                                className="btn-ghost"
+                              >
+                                View
+                              </Link>
                             )}
                           </div>
                         </div>

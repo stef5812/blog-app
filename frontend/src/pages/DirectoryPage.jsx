@@ -112,7 +112,22 @@ export default function DirectoryPage() {
                   key={blog.id}
                   className="card border-lime-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                      {blog.avatarUrl ? (
+                        <img
+                          src={blog.avatarUrl}
+                          alt={blog.displayName || blog.username}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                          —
+                        </div>
+                      )}
+                    </div>
+
                     <div>
                       <h2 className="text-lg font-semibold text-slate-950">
                         {blog.siteTitle || blog.displayName || blog.username}
@@ -121,12 +136,13 @@ export default function DirectoryPage() {
                         @{blog.username}
                       </p>
                     </div>
-
-                    <span
-                      className="h-4 w-4 rounded-full border border-slate-200"
-                      style={{ backgroundColor: blog.themeAccent || "#65a30d" }}
-                    />
                   </div>
+
+                  <span
+                    className="h-4 w-4 rounded-full border border-slate-200"
+                    style={{ backgroundColor: blog.themeAccent || "#65a30d" }}
+                  />
+                </div>
 
                   <p className="mt-4 text-sm leading-6 text-slate-600">
                     {blog.siteDescription || blog.bio || "No description yet."}

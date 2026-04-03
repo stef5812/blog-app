@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import blogLogo from "../assets/logo-hat.png";
 
 function getEnvLinks() {
   const isLocal =
@@ -181,9 +182,13 @@ export default function SiteHeader({ me, setMe }) {
       <div className="page-wrap">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-lime-600 text-sm font-semibold text-white">
-              B
-            </div>
+          <div className="h-10 w-10 overflow-hidden rounded-2xl border border-lime-200 bg-white">
+            <img
+              src={blogLogo}
+              alt="Blog Platform logo"
+              className="h-full w-full object-cover"
+            />
+          </div>
             <div>
               <p className="text-sm font-semibold text-slate-900">Blog Platform</p>
               <p className="text-xs text-slate-500">

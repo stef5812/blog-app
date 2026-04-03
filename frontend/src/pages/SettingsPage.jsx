@@ -1,12 +1,24 @@
 // frontend/src/pages/SettingsPage.jsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { apiFetch, authMe } from "../lib/api";
+import { apiFetch, apiUpload, authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
-import TravelAvatar from "../components/TravelAvatar";
 import logoImg from "../assets/stefandodds-logo-ai.png";
-import avatarsImg from "../assets/travel-avatars.png";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const PRESET_AVATARS = [
+  `${BASE}/avatars/avatar_circle_0_0.png`,
+  `${BASE}/avatars/avatar_circle_0_1.png`,
+  `${BASE}/avatars/avatar_circle_0_2.png`,
+  `${BASE}/avatars/avatar_circle_1_0.png`,
+  `${BASE}/avatars/avatar_circle_1_1.png`,
+  `${BASE}/avatars/avatar_circle_1_2.png`,
+  `${BASE}/avatars/avatar_circle_2_0.png`,
+  `${BASE}/avatars/avatar_circle_2_1.png`,
+  `${BASE}/avatars/avatar_circle_2_2.png`,
+];
 
 export default function SettingsPage() {
   const [me, setMe] = useState(null);
@@ -14,6 +26,7 @@ export default function SettingsPage() {
     username: "",
     displayName: "",
     bio: "",
+    avatarUrl: "",
     siteTitle: "",
     siteDescription: "",
     themeAccent: "#65a30d",
@@ -23,7 +36,8 @@ export default function SettingsPage() {
   const [savedMsg, setSavedMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
-  const [avatarIndex, setAvatarIndex] = useState(0);
+
+  const avatarInputRef = useRef(null);
 
   useEffect(() => {
     let ignore = false;
@@ -42,12 +56,13 @@ export default function SettingsPage() {
 
         if (!ignore) {
           setMe(auth);
-        
+
           if (profile) {
             setForm({
               username: profile.username || "",
               displayName: profile.displayName || "",
               bio: profile.bio || "",
+              avatarUrl: profile.avatarUrl || "",
               siteTitle: profile.siteTitle || "",
               siteDescription: profile.siteDescription || "",
               themeAccent: profile.themeAccent || "#65a30d",
@@ -82,27 +97,65 @@ export default function SettingsPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  function handleChoosePresetAvatar(url) {
+    setForm((prev) => ({
+      ...prev,
+      avatarUrl: url,
+    }));
+  }
+
+  function handleBrowseAvatar() {
+    setErr("");
+    avatarInputRef.current?.click();
+  }
+
+  async function handleAvatarFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErr("Please choose an image file.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setErr("");
+      const uploaded = await apiUpload("/uploads/image", file);
+
+      setForm((prev) => ({
+        ...prev,
+        avatarUrl: uploaded.url,
+      }));
+    } catch (error) {
+      setErr(error.message || "Could not upload the profile photo.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSaving(true);
     setSavedMsg("");
     setErr("");
-  
+
     try {
       const savedProfile = await apiFetch("/me/profile", {
         method: "POST",
         body: JSON.stringify(form),
       });
-  
+
       setForm({
         username: savedProfile.username || "",
         displayName: savedProfile.displayName || "",
         bio: savedProfile.bio || "",
+        avatarUrl: savedProfile.avatarUrl || "",
         siteTitle: savedProfile.siteTitle || "",
         siteDescription: savedProfile.siteDescription || "",
         themeAccent: savedProfile.themeAccent || "#65a30d",
       });
-  
+
       setSavedMsg("Your blog settings have been saved.");
     } catch (error) {
       setErr(error.message || "Could not save your settings.");
@@ -140,12 +193,20 @@ export default function SettingsPage() {
             <div className="card border-lime-100 p-6">
               <p className="text-sm text-slate-500">Preview identity</p>
               <div className="mt-4 flex items-center gap-4">
-                <TravelAvatar
-                  src={avatarsImg}
-                  index={avatarIndex}
-                  size={72}
-                  ring={false}
-                />
+                <div className="h-[72px] w-[72px] overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                  {form.avatarUrl ? (
+                    <img
+                      src={form.avatarUrl}
+                      alt="Profile avatar preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                      No photo
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <p className="text-lg font-semibold text-slate-950">
                     {form.siteTitle || form.displayName || "Your blog title"}
@@ -157,38 +218,104 @@ export default function SettingsPage() {
               </div>
 
               <p className="mt-4 text-sm leading-6 text-slate-600">
-                Cycle through the travel avatars to see which identity style fits
-                your blog best.
+                Upload your own image or choose one of the preset avatars below.
               </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setAvatarIndex(index)}
-                    className={`rounded-full p-1 transition ${
-                      avatarIndex === index
-                        ? "ring-2 ring-lime-500 ring-offset-2 ring-offset-white"
-                        : ""
-                    }`}
-                    aria-label={`Choose avatar ${index + 1}`}
-                  >
-                    <TravelAvatar
-                      src={avatarsImg}
-                      index={index}
-                      size={44}
-                      ring={false}
-                    />
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_320px]">
             <section className="card border-lime-100 p-6 sm:p-8">
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="rounded-3xl border border-lime-100 bg-lime-50/40 p-5 sm:p-6">
+                <h2 className="text-lg font-semibold text-slate-950">Profile photo</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Upload your own photo or choose a preset avatar.
+                </p>
+
+                <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+                  <div className="lg:w-64">
+                    <div className="mx-auto h-32 w-32 overflow-hidden rounded-full border border-slate-200 bg-white">
+                      {form.avatarUrl ? (
+                        <img
+                          src={form.avatarUrl}
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                          No photo
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleBrowseAvatar}
+                        className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                      >
+                        Upload photo
+                      </button>
+
+                      {form.avatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((prev) => ({
+                              ...prev,
+                              avatarUrl: "",
+                            }))
+                          }
+                          className="btn-ghost"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarFileChange}
+                      className="hidden"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-700">
+                      Choose a preset avatar
+                    </p>
+
+                    <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                      {PRESET_AVATARS.map((url) => {
+                        const active = form.avatarUrl === url;
+
+                        return (
+                          <button
+                            key={url}
+                            type="button"
+                            onClick={() => handleChoosePresetAvatar(url)}
+                            className={`overflow-hidden rounded-2xl border bg-white ${
+                              active
+                                ? "border-lime-500 ring-2 ring-lime-200"
+                                : "border-slate-200"
+                            }`}
+                            aria-label="Choose avatar"
+                          >
+                            <img
+                              src={url}
+                              alt="Preset avatar"
+                              className="h-20 w-full object-cover"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 <label>
                   <span className="field-label">Username</span>
                   <input
@@ -259,6 +386,12 @@ export default function SettingsPage() {
                 />
               </label>
 
+              {loading && (
+                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-600">
+                  Loading settings...
+                </div>
+              )}
+
               {err && (
                 <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
                   {err}
@@ -282,7 +415,7 @@ export default function SettingsPage() {
 
                 {form.username && (
                   <Link
-                    to={`/@${form.username}`}
+                    to={`/blog/${form.username}`}
                     className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
                   >
                     View public profile
@@ -301,18 +434,10 @@ export default function SettingsPage() {
                   Branding notes
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  This version uses your green AI logo palette together with the
-                  international travel avatar theme, giving the platform a stronger
-                  branded identity.
+                  You can now use either a custom uploaded profile photo or one of
+                  the preset avatars, while still keeping your blog branding and
+                  theme accent.
                 </p>
-              </div>
-
-              <div className="card overflow-hidden border-lime-100">
-                <img
-                  src={avatarsImg}
-                  alt="Travel avatar collection"
-                  className="h-auto w-full object-cover"
-                />
               </div>
 
               <div className="card border-lime-100 p-6">
