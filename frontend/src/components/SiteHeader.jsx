@@ -1,14 +1,144 @@
 // frontend/src/components/SiteHeader
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+
+function getEnvLinks() {
+  const isLocal =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1");
+
+      if (isLocal) {
+        return {
+          apps: [
+            { label: "Recipe App", href: "http://localhost:5174/recipe-app/" },
+            { label: "HalfYourBook", href: "http://localhost:5175/halfyourbook/" },
+            { label: "Portfolio", href: "http://localhost:5174/" },
+            { label: "Service Locator", href: "http://localhost:5173/" },
+          ],
+          users: [
+            {
+              label: "User Login",
+              href: "http://localhost:3001/login?from=portfolio&next=/menu",
+            },
+            {
+              label: "Register",
+              href: "http://localhost:3001/register?from=portfolio&next=/menu",
+            },
+          ],
+        };
+      }
+    
+      return {
+        apps: [
+          { label: "Recipe App", href: "https://stefandodds.ie/recipe-app/" },
+          { label: "HalfYourBook", href: "https://stefandodds.ie/halfyourbook/" },
+          { label: "Portfolio", href: "https://stefandodds.ie/" },
+          {
+            label: "Service Locator",
+            href: "https://stefandodds.ie/service-locator/",
+          },
+        ],
+        users: [
+          {
+            label: "User Login",
+            href: "https://auth.stefandodds.ie/login?from=portfolio&next=/menu",
+          },
+          {
+            label: "Register",
+            href: "https://auth.stefandodds.ie/register?from=portfolio&next=/menu",
+          },
+        ],
+      };
+}
+
+function LinksDropdown() {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const { apps, users } = getEnvLinks();
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className="rounded-full bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-green-400/70 transition-all duration-300 hover:-translate-y-0.5 hover:from-green-600 hover:to-green-700 hover:shadow-[0_0_14px_rgba(34,197,94,0.45)]"
+      >
+        Links <span className="ml-1">▾</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/95 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-zinc-200/70 backdrop-blur-md">
+          <div className="px-4 pb-2 pt-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+              Apps
+            </p>
+          </div>
+
+          {apps.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="block px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-green-50 hover:text-green-700"
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </a>
+          ))}
+
+          <div className="mx-4 my-2 border-t border-zinc-200" />
+
+          <div className="px-4 pb-2 pt-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+              Users
+            </p>
+          </div>
+
+          {users.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="block px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-green-50 hover:text-green-700"
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SiteHeader({ me, setMe }) {
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-
-  console.log("SiteHeader me:", me);
-  console.log("SiteHeader appRoles:", me?.appRoles);
 
   const isLoggedIn = !!me?.user;
 
@@ -25,24 +155,26 @@ export default function SiteHeader({ me, setMe }) {
     ? `http://localhost:5173/login?from=blog-app&next=${encodeURIComponent(devNext)}`
     : `https://auth.stefandodds.ie/login?from=blog-app&next=${encodeURIComponent(prodNext)}`;
 
-    async function handleLogout() {
-      setLoggingOut(true);
-    
-      try {
-        await fetch("/auth/logout", {
-          method: "POST",
-          credentials: "include",
-        });
-      } catch (error) {
-        console.error("Logout failed:", error);
-      } finally {
-        if (setMe) setMe(null);
-    
-        setOpen(false);
-        setLoggingOut(false);
-        window.location.href = loginHref;
-      }
+  const siteLinks = getEnvLinks();
+
+  async function handleLogout() {
+    setLoggingOut(true);
+
+    try {
+      await fetch("/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      if (setMe) setMe(null);
+
+      setOpen(false);
+      setLoggingOut(false);
+      window.location.href = loginHref;
     }
+  }
 
   return (
     <header className="topbar">
@@ -60,7 +192,6 @@ export default function SiteHeader({ me, setMe }) {
             </div>
           </Link>
 
-          {/* DESKTOP NAV */}
           <nav className="hidden items-center gap-2 md:flex">
             <Link to="/" className="btn-ghost">
               Home
@@ -71,7 +202,9 @@ export default function SiteHeader({ me, setMe }) {
               className="text-sm font-medium text-slate-700 hover:text-lime-700"
             >
               Directory
-            </Link>            
+            </Link>
+
+            <LinksDropdown />
 
             {isLoggedIn ? (
               <>
@@ -90,7 +223,6 @@ export default function SiteHeader({ me, setMe }) {
                   New post
                 </Link>
 
-                {/* ✅ ADMIN BUTTON */}
                 {isAdmin && (
                   <Link
                     to="/dashboard/admin"
@@ -119,7 +251,6 @@ export default function SiteHeader({ me, setMe }) {
             )}
           </nav>
 
-          {/* MOBILE MENU BUTTON */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -129,7 +260,6 @@ export default function SiteHeader({ me, setMe }) {
           </button>
         </div>
 
-        {/* MOBILE MENU */}
         {open && (
           <div className="border-t border-slate-200 py-3 md:hidden">
             <div className="flex flex-col gap-2">
@@ -137,27 +267,62 @@ export default function SiteHeader({ me, setMe }) {
                 Home
               </Link>
 
+              <Link
+                to="/directory"
+                onClick={() => setOpen(false)}
+                className="btn-ghost"
+              >
+                Directory
+              </Link>
+
+              <div className="mt-2 px-1">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Other apps
+                </p>
+                <div className="flex flex-col gap-2">
+                  {siteLinks.map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="btn-ghost text-left"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
               {isLoggedIn ? (
                 <>
-                  <Link to="/dashboard" className="btn-ghost">
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="btn-ghost"
+                  >
                     Dashboard
                   </Link>
 
-                  <Link to="/dashboard/settings" className="btn-ghost">
+                  <Link
+                    to="/dashboard/settings"
+                    onClick={() => setOpen(false)}
+                    className="btn-ghost"
+                  >
                     Settings
                   </Link>
 
                   <Link
                     to="/dashboard/posts/new"
+                    onClick={() => setOpen(false)}
                     className="btn-primary bg-lime-600"
                   >
                     New post
                   </Link>
 
-                  {/* ✅ ADMIN BUTTON MOBILE */}
                   {isAdmin && (
                     <Link
                       to="/dashboard/admin"
+                      onClick={() => setOpen(false)}
                       className="btn-secondary border-red-200 text-red-700"
                     >
                       Admin
@@ -173,7 +338,11 @@ export default function SiteHeader({ me, setMe }) {
                   </button>
                 </>
               ) : (
-                <a href={loginHref} className="btn-primary">
+                <a
+                  href={loginHref}
+                  onClick={() => setOpen(false)}
+                  className="btn-primary"
+                >
                   Login
                 </a>
               )}
