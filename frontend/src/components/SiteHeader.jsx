@@ -1,4 +1,4 @@
-// frontend/src/components/SiteHeader
+// frontend/src/components/SiteHeader.jsx
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -88,7 +88,7 @@ function LinksDropdown() {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="rounded-full bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-green-400/70 transition-all duration-300 hover:-translate-y-0.5 hover:from-green-600 hover:to-green-700 hover:shadow-[0_0_14px_rgba(34,197,94,0.45)]"
+        className="btn-primary bg-lime-600 hover:bg-lime-700"
       >
         Links <span className="ml-1">▾</span>
       </button>
@@ -314,7 +314,7 @@ export default function SiteHeader({ me, setMe }) {
                   <Link
                     to="/dashboard/posts/new"
                     onClick={() => setOpen(false)}
-                    className="btn-primary bg-lime-600"
+                    className="btn-primary bg-lime-600 hover:bg-lime-700"
                   >
                     New post
                   </Link>
