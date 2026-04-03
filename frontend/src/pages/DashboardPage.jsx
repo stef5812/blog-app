@@ -2,19 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { apiFetch, authMe } from "../lib/api";
+import { apiFetch, apiUpload, authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 const PRESET_AVATARS = [
-  "/blog-app/avatars/avatar_circle_0_0.png",
-  "/blog-app/avatars/avatar_circle_0_1.png",
-  "/blog-app/avatars/avatar_circle_0_2.png",
-  "/blog-app/avatars/avatar_circle_1_0.png",
-  "/blog-app/avatars/avatar_circle_1_1.png",
-  "/blog-app/avatars/avatar_circle_1_2.png",
-  "/blog-app/avatars/avatar_circle_2_0.png",
-  "/blog-app/avatars/avatar_circle_2_1.png",
-  "/blog-app/avatars/avatar_circle_2_2.png",
+  `${BASE}/avatars/avatar_circle_0_0.png`,
+  `${BASE}/avatars/avatar_circle_0_1.png`,
+  `${BASE}/avatars/avatar_circle_0_2.png`,
+  `${BASE}/avatars/avatar_circle_1_0.png`,
+  `${BASE}/avatars/avatar_circle_1_1.png`,
+  `${BASE}/avatars/avatar_circle_1_2.png`,
+  `${BASE}/avatars/avatar_circle_2_0.png`,
+  `${BASE}/avatars/avatar_circle_2_1.png`,
+  `${BASE}/avatars/avatar_circle_2_2.png`,
 ];
 
 export default function DashboardPage() {
@@ -84,41 +86,38 @@ export default function DashboardPage() {
     };
   }, []);
 
-  async function handlePresetSelect(url) {
+  function handlePresetSelect(url) {
     setAvatarUrl(url);
-    setAvatarMsg("");
+    setAvatarMsg("Avatar selected. Save settings to keep it.");
+    setErr("");
   }
 
-  async function handleUploadChange(event) {
+  function handleBrowseAvatar() {
+    setErr("");
+    fileInputRef.current?.click();
+  }
+
+  async function handleAvatarFileChange(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      setErr("Please choose an image file.");
+      event.target.value = "";
+      return;
+    }
+
     setAvatarBusy(true);
     setAvatarMsg("");
+    setErr("");
 
     try {
-      const formData = new FormData();
-      formData.append("image", file);
+      const uploaded = await apiUpload("/uploads/image", file);
 
-      const res = await fetch("/api/me/profile/avatar-upload", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        throw new Error("Could not upload image.");
-      }
-
-      const data = await res.json();
-      if (!data?.url) {
-        throw new Error("Upload did not return an image URL.");
-      }
-
-      setAvatarUrl(data.url);
-      setAvatarMsg("Image uploaded. Save to keep it.");
+      setAvatarUrl(uploaded.url);
+      setAvatarMsg("Photo uploaded. Save settings to keep it.");
     } catch (error) {
-      setAvatarMsg(error.message || "Upload failed.");
+      setErr(error.message || "Could not upload the profile photo.");
     } finally {
       setAvatarBusy(false);
       event.target.value = "";
@@ -130,21 +129,27 @@ export default function DashboardPage() {
 
     setAvatarBusy(true);
     setAvatarMsg("");
+    setErr("");
 
     try {
-      const updated = await apiFetch("/me/profile", {
-        method: "PUT",
+      const savedProfile = await apiFetch("/me/profile", {
+        method: "POST",
         body: JSON.stringify({
-          ...profile,
+          username: profile.username || "",
+          displayName: profile.displayName || "",
+          bio: profile.bio || "",
           avatarUrl,
+          siteTitle: profile.siteTitle || "",
+          siteDescription: profile.siteDescription || "",
+          themeAccent: profile.themeAccent || "#65a30d",
         }),
       });
 
-      setProfile(updated);
-      setAvatarUrl(updated?.avatarUrl || avatarUrl);
-      setAvatarMsg("Profile image saved.");
+      setProfile(savedProfile);
+      setAvatarUrl(savedProfile?.avatarUrl || "");
+      setAvatarMsg("Profile photo saved.");
     } catch (error) {
-      setAvatarMsg(error.message || "Could not save profile image.");
+      setErr(error.message || "Could not save profile photo.");
     } finally {
       setAvatarBusy(false);
     }
@@ -224,17 +229,37 @@ export default function DashboardPage() {
               <div className="mt-6 card border-lime-100 p-6 sm:p-8">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-slate-950">
-                      {profile.siteTitle || profile.displayName || "Your blog"}
-                    </h2>
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                      <div className="h-20 w-20 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                        {profile.avatarUrl ? (
+                          <img
+                            src={profile.avatarUrl}
+                            alt={profile.displayName || profile.siteTitle || "Profile"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                            No photo
+                          </div>
+                        )}
+                      </div>
 
-                    <p className="mt-2 text-slate-600">
-                      {profile.username ? `@${profile.username}` : ""}
-                    </p>
+                      <div>
+                        <h2 className="text-xl font-semibold text-slate-950">
+                          {profile.siteTitle || profile.displayName || "Your blog"}
+                        </h2>
 
-                    {profile.siteDescription && (
-                      <p className="mt-4 text-slate-600">{profile.siteDescription}</p>
-                    )}
+                        <p className="mt-2 text-slate-600">
+                          {profile.username ? `@${profile.username}` : ""}
+                        </p>
+
+                        {profile.siteDescription && (
+                          <p className="mt-4 text-slate-600">
+                            {profile.siteDescription}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
                     <div className="mt-6 flex flex-wrap gap-3">
                       <Link
@@ -250,12 +275,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="w-full max-w-sm rounded-2xl border border-lime-100 bg-white p-5">
+                  <div className="w-full max-w-md rounded-2xl border border-lime-100 bg-white p-5">
                     <h3 className="text-lg font-semibold text-slate-950">
                       Profile photo
                     </h3>
                     <p className="mt-2 text-sm text-slate-600">
-                      Upload your own image or pick one from the gallery.
+                      Upload your own photo or choose one of the preset avatars.
                     </p>
 
                     <div className="mt-4 flex justify-center">
@@ -277,7 +302,7 @@ export default function DashboardPage() {
                     <div className="mt-5 flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={handleBrowseAvatar}
                         className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
                         disabled={avatarBusy}
                       >
@@ -288,17 +313,32 @@ export default function DashboardPage() {
                         type="button"
                         onClick={handleSaveAvatar}
                         className="btn-primary bg-lime-600 hover:bg-lime-700"
-                        disabled={avatarBusy || !avatarUrl}
+                        disabled={avatarBusy}
                       >
                         Save photo
                       </button>
+
+                      {avatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAvatarUrl("");
+                            setAvatarMsg("Photo removed. Save settings to keep the change.");
+                            setErr("");
+                          }}
+                          className="btn-ghost"
+                          disabled={avatarBusy}
+                        >
+                          Remove
+                        </button>
+                      )}
                     </div>
 
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
-                      onChange={handleUploadChange}
+                      onChange={handleAvatarFileChange}
                       className="hidden"
                     />
 
@@ -307,7 +347,7 @@ export default function DashboardPage() {
                         Choose a preset
                       </p>
 
-                      <div className="mt-3 grid grid-cols-4 gap-3">
+                      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
                         {PRESET_AVATARS.map((url) => {
                           const active = avatarUrl === url;
 
@@ -316,7 +356,7 @@ export default function DashboardPage() {
                               key={url}
                               type="button"
                               onClick={() => handlePresetSelect(url)}
-                              className={`overflow-hidden rounded-2xl border ${
+                              className={`overflow-hidden rounded-2xl border bg-white ${
                                 active
                                   ? "border-lime-500 ring-2 ring-lime-200"
                                   : "border-slate-200"
