@@ -44,7 +44,7 @@ export default function HomePage() {
 
   return (
     <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_35%,#ffffff_100%)]">
-      <SiteHeader me={me} />
+      <SiteHeader me={me} setMe={setMe} />
 
       <main>
         <section className="page-section overflow-hidden">

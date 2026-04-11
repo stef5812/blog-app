@@ -1,7 +1,7 @@
 // frontend/src/components/SiteHeader.jsx
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import blogLogo from "../assets/logo-hat.png";
 
 function getEnvLinks() {
@@ -15,8 +15,8 @@ function getEnvLinks() {
       apps: [
         { label: "Recipe App", href: "http://localhost:5174/recipe-app/" },
         { label: "HalfYourBook", href: "http://localhost:5175/halfyourbook/" },
-        { label: "Portfolio", href: "http://localhost:5174/" },
-        { label: "Service Locator", href: "http://localhost:5173/" },
+        { label: "Portfolio", href: "http://localhost:5177/" },
+        { label: "Service Locator", href: "http://localhost:5178/" },
       ],
       users: [
         {
@@ -114,6 +114,7 @@ function LinksDropdown() {
 }
 
 export default function SiteHeader({ me, setMe }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -148,7 +149,7 @@ export default function SiteHeader({ me, setMe }) {
       if (setMe) setMe(null);
       setOpen(false);
       setLoggingOut(false);
-      window.location.href = loginHref;
+      navigate("/", { replace: true });
     }
   }
 
@@ -187,7 +188,7 @@ export default function SiteHeader({ me, setMe }) {
               Directory
             </Link>
 
-            {isLoggedIn ? (
+            {isLoggedIn && (
               <>
                 <Link to="/dashboard" className="btn-ghost">
                   Dashboard
@@ -212,18 +213,20 @@ export default function SiteHeader({ me, setMe }) {
                     Admin
                   </Link>
                 )}
-
-                <LinksDropdown />
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50 disabled:opacity-60"
-                >
-                  {loggingOut ? "Logging out..." : "Logout"}
-                </button>
               </>
+            )}
+
+            <LinksDropdown />
+
+            {isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50 disabled:opacity-60"
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
             ) : (
               <a
                 href={loginHref}
