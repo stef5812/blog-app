@@ -9,6 +9,7 @@ import publicRoutes from "./routes/public.js";
 import meRoutes from "./routes/me.js";
 import adminRoutes from "./routes/admin.js";
 import uploadRoutes from "./routes/uploads.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use((req, res, next) => {
   console.log("INCOMING:", req.method, req.url);
   next();
 });
+
+app.use("/api/me/ai", aiRoutes);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

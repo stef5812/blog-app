@@ -14,6 +14,8 @@ import TextAlign from "@tiptap/extension-text-align";
 import FontFamily from "@tiptap/extension-font-family";
 import SiteHeader from "../components/SiteHeader";
 
+import AIAssistantPanel from "../components/AIAssistantPanel";
+
 function ToolbarButton({ onClick, label, active }) {
   return (
     <button
@@ -51,6 +53,10 @@ export default function EditPostPage() {
   const [err, setErr] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
 
+  const [selectedText, setSelectedText] = useState("");
+
+  const [selectionRange, setSelectionRange] = useState({ from: null, to: null });
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -73,6 +79,15 @@ export default function EditPostPage() {
         class:
           "min-h-[320px] sm:min-h-[420px] w-full outline-none text-slate-800 leading-8",
       },
+    },
+    onSelectionUpdate: ({ editor }) => {
+      const { from, to } = editor.state.selection;
+      const text = editor.state.doc.textBetween(from, to, "\n").trim();
+    
+      if (text) {
+        setSelectedText(text);
+        setSelectionRange({ from, to });
+      }
     },
   });
 
@@ -233,6 +248,32 @@ export default function EditPostPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleReplaceWithAI(text) {
+    if (!editor || !text) return;
+  
+    const { from, to } = selectionRange || {};
+    if (from == null || to == null) return;
+  
+    editor
+      .chain()
+      .focus()
+      .insertContentAt({ from, to }, text)
+      .run();
+  }
+  
+  function handleInsertBelowWithAI(text) {
+    if (!editor || !text) return;
+  
+    const { to } = selectionRange || {};
+    const insertPos = to ?? editor.state.selection.to;
+  
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(insertPos, `\n\n${text}`)
+      .run();
   }
 
   return (
@@ -535,17 +576,24 @@ export default function EditPostPage() {
                 )}
               </div>
 
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-950">
-                  Writing notes
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Your content is saved as structured JSON, which makes the
-                  public rendering cleaner and leaves room for future features
-                  like reusable blocks, themes, and richer formatting.
-                </p>
-              </div>
-            </aside>
+              <AIAssistantPanel
+                selectedText={selectedText}
+                fullText={editor?.getText?.() || ""}
+                onReplace={handleReplaceWithAI}
+                onInsertBelow={handleInsertBelowWithAI}
+              />
+
+  <div className="card p-6">
+    <h2 className="text-lg font-semibold text-slate-950">
+      Writing notes
+    </h2>
+    <p className="mt-3 text-sm leading-7 text-slate-600">
+      Your content is saved as structured JSON, which makes the
+      public rendering cleaner and leaves room for future features
+      like reusable blocks, themes, and richer formatting.
+    </p>
+  </div>
+</aside>
           </div>
         </div>
       </main>

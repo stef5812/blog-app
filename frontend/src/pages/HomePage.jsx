@@ -15,6 +15,20 @@ const highlights = [
   "Travel-themed branding with reusable avatars",
 ];
 
+const AUTH_BASE = (
+  import.meta.env.VITE_AUTH_BASE || "http://localhost:5173"
+).replace(/\/+$/, "");
+
+const APP_BASE_URL = (
+  import.meta.env.VITE_APP_BASE_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "")
+).replace(/\/+$/, "");
+
+function getAuthRegisterUrl() {
+  const next = encodeURIComponent(`${APP_BASE_URL}/dashboard/settings`);
+  return `${AUTH_BASE}/register?from=blog-app&next=${next}`;
+}
+
 export default function HomePage() {
   const [me, setMe] = useState(null);
 
@@ -41,6 +55,9 @@ export default function HomePage() {
       ignore = true;
     };
   }, []);
+
+  const isLoggedIn = Boolean(me?.user);
+  const setupHref = isLoggedIn ? "/dashboard/settings" : getAuthRegisterUrl();
 
   return (
     <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_35%,#ffffff_100%)]">
@@ -75,12 +92,14 @@ export default function HomePage() {
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    to="/dashboard"
-                    className="btn-primary bg-lime-600 hover:bg-lime-700"
-                  >
-                    Open dashboard
-                  </Link>
+                  {isLoggedIn && (
+                    <Link
+                      to="/dashboard"
+                      className="btn-primary bg-lime-600 hover:bg-lime-700"
+                    >
+                      Open dashboard
+                    </Link>
+                  )}
 
                   <Link
                     to="/directory"
@@ -89,12 +108,21 @@ export default function HomePage() {
                     Browse blogs
                   </Link>
 
-                  <Link
-                    to="/dashboard/settings"
-                    className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
-                  >
-                    Set up my blog
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link
+                      to="/dashboard/settings"
+                      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                    >
+                      Set up my blog
+                    </Link>
+                  ) : (
+                    <a
+                      href={setupHref}
+                      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                    >
+                      Set up my blog
+                    </a>
+                  )}
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -128,7 +156,9 @@ export default function HomePage() {
                 <div className="card relative overflow-hidden border-lime-100 p-4 sm:p-6">
                   <div className="mb-5 flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Featured travel writers</p>
+                      <p className="text-sm text-slate-500">
+                        Featured travel writers
+                      </p>
                       <h2 className="text-2xl font-semibold text-slate-950">
                         Global voices
                       </h2>
@@ -167,7 +197,9 @@ export default function HomePage() {
             <div className="grid gap-5 md:grid-cols-3">
               <div className="card border-lime-100 p-6">
                 <p className="text-sm text-slate-500">Public reading</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">No login</p>
+                <p className="mt-2 text-3xl font-semibold text-slate-950">
+                  No login
+                </p>
                 <p className="mt-3 text-slate-600">
                   Anyone can browse profiles and posts without joining.
                 </p>
@@ -175,7 +207,9 @@ export default function HomePage() {
 
               <div className="card border-lime-100 p-6">
                 <p className="text-sm text-slate-500">Author identity</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">@username</p>
+                <p className="mt-2 text-3xl font-semibold text-slate-950">
+                  @username
+                </p>
                 <p className="mt-3 text-slate-600">
                   Each writer gets their own public blog space and theme.
                 </p>
@@ -183,7 +217,9 @@ export default function HomePage() {
 
               <div className="card border-lime-100 p-6">
                 <p className="text-sm text-slate-500">Content format</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">JSON editor</p>
+                <p className="mt-2 text-3xl font-semibold text-slate-950">
+                  JSON editor
+                </p>
                 <p className="mt-3 text-slate-600">
                   Structured content for cleaner rendering and future features.
                 </p>

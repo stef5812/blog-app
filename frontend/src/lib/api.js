@@ -12,6 +12,33 @@ function buildUrl(base, path) {
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export async function aiGenerateTitles(content) {
+  const data = await apiFetch("/me/ai/title", {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+
+  if (!data?.ok) {
+    throw new Error(data?.error || "AI title generation failed.");
+  }
+
+  return data.titles;
+}
+
+// frontend/src/lib/api.js
+export async function aiRewrite({ text, instruction }) {
+  const data = await apiFetch("/me/ai/rewrite", {
+    method: "POST",
+    body: JSON.stringify({ text, instruction }),
+  });
+
+  if (!data?.ok) {
+    throw new Error(data?.error || "AI rewrite failed.");
+  }
+
+  return data.result;
+}
+
 export async function apiFetch(path, options = {}) {
   const response = await fetch(buildUrl(API_BASE, path), {
     credentials: "include",
