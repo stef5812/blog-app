@@ -6,7 +6,6 @@ import { apiFetch, apiUpload, authMe } from "../lib/api";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
@@ -63,7 +62,6 @@ export default function EditPostPage() {
     extensions: [
       StarterKit,
       Image,
-      Underline,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
