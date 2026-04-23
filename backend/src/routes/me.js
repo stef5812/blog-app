@@ -139,7 +139,15 @@ router.get("/posts", async (req, res) => {
 router.post("/posts", async (req, res) => {
   try {
     const userId = req.user.id;
-    const { title, excerpt, coverImageUrl, contentJson } = req.body;
+    const {
+      title,
+      excerpt,
+      coverImageUrl,
+      coverMediaType,
+      coverThumbnailUrl,
+      contentJson,
+      status,
+    } = req.body;
 
     const profile = await prisma.blogProfile.findUnique({
       where: { userId },
@@ -167,6 +175,8 @@ router.post("/posts", async (req, res) => {
       slug = `${baseSlug}-${suffix}`;
     }
 
+    const postStatus = status || "DRAFT";
+
     const post = await prisma.post.create({
       data: {
         userId,
@@ -175,7 +185,11 @@ router.post("/posts", async (req, res) => {
         slug,
         excerpt: excerpt || "",
         coverImageUrl: coverImageUrl || "",
+        coverMediaType: coverMediaType || (coverImageUrl ? "image" : null),
+        coverThumbnailUrl: coverThumbnailUrl || "",
         contentJson: contentJson ?? {},
+        status: postStatus,
+        publishedAt: postStatus === "PUBLISHED" ? new Date() : null,
       },
     });
 
@@ -190,7 +204,15 @@ router.put("/posts/:id", async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { title, excerpt, coverImageUrl, contentJson, status } = req.body;
+    const {
+      title,
+      excerpt,
+      coverImageUrl,
+      coverMediaType,
+      coverThumbnailUrl,
+      contentJson,
+      status,
+    } = req.body;
 
     const existing = await prisma.post.findFirst({
       where: { id, userId },
@@ -204,6 +226,8 @@ router.put("/posts/:id", async (req, res) => {
       title,
       excerpt,
       coverImageUrl,
+      coverMediaType: coverMediaType || (coverImageUrl ? "image" : null),
+      coverThumbnailUrl: coverThumbnailUrl || "",
       contentJson,
       status,
     };

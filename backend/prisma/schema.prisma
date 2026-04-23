@@ -32,20 +32,22 @@ model BlogProfile {
 }
 
 model Post {
-  id            String     @id @default(cuid())
-  userId        String
-  blogProfileId String
-  title         String
-  slug          String
-  excerpt       String?
-  coverImageUrl String?
-  contentJson   Json
-  status        PostStatus @default(DRAFT)
-  publishedAt   DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id                String     @id @default(cuid())
+  userId            String
+  blogProfileId     String
+  title             String
+  slug              String
+  excerpt           String?
+  coverImageUrl     String?
+  coverMediaType    String?    // "image" or "video"
+  coverThumbnailUrl String?
+  contentJson       Json
+  status            PostStatus @default(DRAFT)
+  publishedAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
-  blogProfile   BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
+  blogProfile       BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
 
   @@unique([blogProfileId, slug])
   @@index([userId])

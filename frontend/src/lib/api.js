@@ -25,7 +25,6 @@ export async function aiGenerateTitles(content) {
   return data.titles;
 }
 
-// frontend/src/lib/api.js
 export async function aiRewrite({ text, instruction }) {
   const data = await apiFetch("/me/ai/rewrite", {
     method: "POST",
@@ -82,9 +81,9 @@ export async function authMe() {
   return data;
 }
 
-export async function apiUpload(path, file) {
+export async function apiUpload(path, file, fieldName = "image") {
   const formData = new FormData();
-  formData.append("image", file);
+  formData.append(fieldName, file);
 
   const res = await fetch(buildUrl(API_BASE, path), {
     method: "POST",

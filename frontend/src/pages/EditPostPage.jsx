@@ -45,6 +45,8 @@ export default function EditPostPage() {
     title: "",
     excerpt: "",
     coverImageUrl: "",
+    coverMediaType: "image",
+    coverThumbnailUrl: "",
     status: "DRAFT",
   });
 
@@ -61,6 +63,7 @@ export default function EditPostPage() {
     extensions: [
       StarterKit,
       Image,
+      Underline,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
@@ -116,6 +119,8 @@ export default function EditPostPage() {
               title: post.title || "",
               excerpt: post.excerpt || "",
               coverImageUrl: post.coverImageUrl || "",
+              coverMediaType: post.coverMediaType || "image",
+              coverThumbnailUrl: post.coverThumbnailUrl || "",
               status: post.status || "DRAFT",
             });
 
@@ -186,23 +191,31 @@ export default function EditPostPage() {
   async function handleCoverImageFileChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setErr("Please choose an image file for the cover.");
+  
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+  
+    if (!isImage && !isVideo) {
+      setErr("Please choose an image or video file for the cover.");
       e.target.value = "";
       return;
     }
-
+  
     try {
       setErr("");
-      const uploaded = await apiUpload("/uploads/image", file);
-
+  
+      const uploadPath = isVideo ? "/uploads/video" : "/uploads/image";
+      const fieldName = isVideo ? "video" : "image";
+      const uploaded = await apiUpload(uploadPath, file, fieldName);
+  
       setForm((prev) => ({
         ...prev,
-        coverImageUrl: uploaded.url,
+        coverImageUrl: uploaded.url || "",
+        coverMediaType: uploaded.mediaType || (isVideo ? "video" : "image"),
+        coverThumbnailUrl: uploaded.thumbnailUrl || "",
       }));
     } catch (error) {
-      setErr(error.message || "Could not upload the cover image.");
+      setErr(error.message || "Could not upload the cover media.");
     } finally {
       e.target.value = "";
     }
@@ -342,12 +355,12 @@ export default function EditPostPage() {
               </label>
 
               <label className="mt-5 block">
-                <span className="field-label">Cover image URL</span>
+                <span className="field-label">Cover Media URL</span>
                 <input
                   name="coverImageUrl"
                   value={form.coverImageUrl}
                   onChange={updateField}
-                  placeholder="/uploads/blog/your-user-id/cover.jpg"
+                  placeholder="/uploads/blog/your-user-id/cover.jpg or /uploads/blog/your-user-id/cover.mp4"
                   className="field-input"
                 />
               </label>
@@ -358,7 +371,7 @@ export default function EditPostPage() {
                   onClick={handleBrowseCoverImage}
                   className="btn-secondary"
                 >
-                  Browse cover image
+                  Browse cover image/video
                 </button>
 
                 {form.coverImageUrl && (
@@ -368,11 +381,13 @@ export default function EditPostPage() {
                       setForm((prev) => ({
                         ...prev,
                         coverImageUrl: "",
+                        coverMediaType: "image",
+                        coverThumbnailUrl: "",
                       }))
                     }
                     className="btn-ghost"
                   >
-                    Remove cover image
+                    Remove cover media
                   </button>
                 )}
               </div>
@@ -380,18 +395,46 @@ export default function EditPostPage() {
               <input
                 ref={coverImageInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
                 onChange={handleCoverImageFileChange}
                 className="hidden"
               />
 
               {form.coverImageUrl && (
                 <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-                  <img
-                    src={form.coverImageUrl}
-                    alt="Cover preview"
-                    className="h-48 w-full object-cover"
-                  />
+                  {form.coverMediaType === "video" ? (
+                    <div className="relative h-48 w-full bg-slate-100">
+                      {form.coverThumbnailUrl ? (
+                        <img
+                          src={form.coverThumbnailUrl}
+                          alt="Video cover preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={form.coverImageUrl}
+                          className="h-full w-full object-cover"
+                          muted
+                          playsInline
+                          autoPlay
+                          loop
+                          preload="metadata"
+                        />
+                      )}
+
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-black">
+                          ▶ Video cover
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={form.coverImageUrl}
+                      alt="Cover preview"
+                      className="h-48 w-full object-cover"
+                    />
+                  )}
                 </div>
               )}
 
