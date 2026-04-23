@@ -276,20 +276,34 @@ export default function PublicPostPage() {
           </div>
 
           <article className="card overflow-hidden">
-            {post.coverImageUrl ? (
+          {post.coverImageUrl ? (
+            post.coverMediaType === "video" ? (
+              <video
+                src={post.coverImageUrl}
+                className="h-56 w-full border-b border-slate-200 object-cover sm:h-72"
+                poster={post.coverThumbnailUrl || undefined}
+                muted
+                playsInline
+                autoPlay
+                loop
+                controls
+                preload="metadata"
+              />
+            ) : (
               <img
                 src={post.coverImageUrl}
                 alt={post.title || "Cover image"}
                 className="h-56 w-full border-b border-slate-200 object-cover sm:h-72"
               />
-            ) : (
-              <div
-                className="h-56 w-full border-b border-slate-200 sm:h-72"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}22, #e2e8f0 75%)`,
-                }}
-              />
-            )}
+            )
+          ) : (
+            <div
+              className="h-56 w-full border-b border-slate-200 sm:h-72"
+              style={{
+                background: `linear-gradient(135deg, ${accent}22, #e2e8f0 75%)`,
+              }}
+            />
+          )}
 
             <div className="p-6 sm:p-8 lg:p-10">
               <header>

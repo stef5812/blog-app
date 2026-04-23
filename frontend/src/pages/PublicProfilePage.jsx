@@ -158,18 +158,46 @@ export default function PublicProfilePage() {
       className="rounded-2xl border border-slate-200 bg-white p-5"
     >
       <div className="flex gap-4">
-        {post.coverImageUrl ? (
-          <Link
-            to={`/blog/${profile.username}/post/${post.slug}`}
-            className="shrink-0"
-          >
-            <img
-              src={post.coverImageUrl}
-              alt={post.title || "Post cover"}
-              className="h-24 w-24 rounded-xl border border-slate-200 object-cover sm:h-28 sm:w-28"
-            />
-          </Link>
-        ) : null}
+      {post.coverImageUrl ? (
+  <Link
+    to={`/blog/${profile.username}/post/${post.slug}`}
+    className="shrink-0"
+  >
+    {post.coverMediaType === "video" ? (
+      <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-slate-200 sm:h-28 sm:w-28">
+        {post.coverThumbnailUrl ? (
+          <img
+            src={post.coverThumbnailUrl}
+            alt={post.title || "Video thumbnail"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <video
+            src={post.coverImageUrl}
+            className="h-full w-full object-cover"
+            muted
+            playsInline
+            autoPlay
+            loop
+            preload="metadata"
+          />
+        )}
+
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+          <div className="rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-black">
+            ▶
+          </div>
+        </div>
+      </div>
+    ) : (
+      <img
+        src={post.coverImageUrl}
+        alt={post.title || "Post cover"}
+        className="h-24 w-24 rounded-xl border border-slate-200 object-cover sm:h-28 sm:w-28"
+      />
+    )}
+  </Link>
+) : null}
 
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold text-slate-950">
