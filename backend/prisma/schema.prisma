@@ -31,6 +31,25 @@ model BlogProfile {
   @@index([username])
 }
 
+model MediaItem {
+  id           String   @id @default(cuid())
+  userId       String
+  postId       String?
+  url          String
+  mediaType    String   // "image" or "video"
+  title        String?
+  description  String?
+  thumbnailUrl String?
+  source       String   @default("gallery")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  post         Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postId])
+}
+
 model Post {
   id                String     @id @default(cuid())
   userId            String
@@ -39,7 +58,7 @@ model Post {
   slug              String
   excerpt           String?
   coverImageUrl     String?
-  coverMediaType    String?    // "image" or "video"
+  coverMediaType    String?
   coverThumbnailUrl String?
   contentJson       Json
   status            PostStatus @default(DRAFT)
@@ -48,6 +67,7 @@ model Post {
   updatedAt         DateTime   @updatedAt
 
   blogProfile       BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
+  mediaItems        MediaItem[]
 
   @@unique([blogProfileId, slug])
   @@index([userId])

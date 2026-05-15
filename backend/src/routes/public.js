@@ -180,4 +180,106 @@ router.get("/blogs/:username/posts/:slug", async (req, res) => {
   }
 });
 
+// Public post gallery
+router.get("/blogs/:username/posts/:slug/gallery", async (req, res) => {
+  try {
+    const { username, slug } = req.params;
+
+    const profile = await prisma.blogProfile.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        siteTitle: true,
+        themeAccent: true,
+      },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    const post = await prisma.post.findFirst({
+      where: {
+        blogProfileId: profile.id,
+        slug,
+        status: "PUBLISHED",
+      },
+      include: {
+        mediaItems: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const items = [];
+
+    // Gallery uploads
+    for (const item of post.mediaItems || []) {
+      items.push({
+        id: item.id,
+        url: item.url,
+        mediaType: item.mediaType,
+        thumbnailUrl: item.thumbnailUrl || null,
+        caption: item.title || item.description || "",
+        source: item.source || "gallery",
+      });
+    }
+
+    // Cover image/video
+    if (post.coverImageUrl) {
+      items.push({
+        id: `cover-${post.id}`,
+        url: post.coverImageUrl,
+        mediaType: post.coverMediaType || "image",
+        thumbnailUrl: post.coverThumbnailUrl || null,
+        caption: "Cover media",
+        source: "cover",
+      });
+    }
+
+    // Images inside the post content
+    function extractMedia(node) {
+      if (!node) return;
+
+      if (node.type === "image" && node.attrs?.src) {
+        items.push({
+          id: `post-${items.length}`,
+          url: node.attrs.src,
+          mediaType: "image",
+          thumbnailUrl: null,
+          caption: node.attrs.alt || node.attrs.title || "",
+          source: "post",
+        });
+      }
+
+      if (Array.isArray(node.content)) {
+        node.content.forEach(extractMedia);
+      }
+    }
+
+    extractMedia(post.contentJson);
+
+    return res.json({
+      profile,
+      post: {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        publishedAt: post.publishedAt,
+      },
+      items,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to load gallery" });
+  }
+});
+
 export default router;

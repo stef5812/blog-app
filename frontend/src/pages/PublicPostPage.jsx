@@ -330,6 +330,14 @@ export default function PublicPostPage() {
                       : "Draft"}
                   </span>
                 </div>
+                <div className="mt-6">
+                  <Link
+                    to={`/blog/${cleanUsername}/post/${slug}/gallery`}
+                    className="btn-secondary"
+                  >
+                    Open Gallery
+                  </Link>
+                </div>
               </header>
 
               <div className="mt-10">

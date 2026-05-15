@@ -10,6 +10,7 @@ import meRoutes from "./routes/me.js";
 import adminRoutes from "./routes/admin.js";
 import uploadRoutes from "./routes/uploads.js";
 import aiRoutes from "./routes/ai.routes.js";
+import mediaRoutes from "./routes/media.js";
 
 const app = express();
 
@@ -40,6 +41,8 @@ app.use((req, res, next) => {
 app.use("/api/me/ai", aiRoutes);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+app.use("/api/media", mediaRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ ok: true, app: "blog-app" });

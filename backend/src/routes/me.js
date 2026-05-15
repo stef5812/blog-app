@@ -5,9 +5,40 @@ import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { slugify } from "../lib/slugify.js";
 
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+
 const router = Router();
 
-// All /me routes require login, but not AUTHOR/ADMIN
+const publicUploadsBase = process.env.PUBLIC_UPLOADS_BASE || "";
+const uploadRoot = path.join(process.cwd(), "uploads", "blog");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const userId = req.user.id;
+    const userDir = path.join(uploadRoot, String(userId));
+
+    fs.mkdirSync(userDir, { recursive: true });
+
+    cb(null, userDir);
+  },
+
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+    cb(null, filename);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 1024 * 1024 * 1024,
+  },
+});
+
 router.use(requireAuth);
 
 router.get("/profile", async (req, res) => {
@@ -245,6 +276,227 @@ router.put("/posts/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to update post" });
+  }
+});
+
+router.get("/posts/:id/gallery", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const post = await prisma.post.findFirst({
+      where: { id, userId },
+      include: {
+        mediaItems: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const items = [];
+
+    if (post.coverImageUrl) {
+      items.push({
+        id: `cover-${post.id}`,
+        url: post.coverImageUrl,
+        mediaType: post.coverMediaType || "image",
+        thumbnailUrl: post.coverThumbnailUrl || null,
+        caption: "Cover media",
+        source: "cover",
+        locked: true,
+      });
+    }
+
+    function extractMedia(node) {
+      if (!node) return;
+
+      if (node.type === "image" && node.attrs?.src) {
+        items.push({
+          id: `img-${items.length}`,
+          url: node.attrs.src,
+          mediaType: "image",
+          thumbnailUrl: null,
+          caption: node.attrs.alt || "",
+          source: "post",
+          locked: true,
+        });
+      }
+
+      if (Array.isArray(node.content)) {
+        node.content.forEach(extractMedia);
+      }
+    }
+
+    extractMedia(post.contentJson);
+
+    const galleryItems = post.mediaItems.map((item) => ({
+      id: item.id,
+      url: item.url,
+      mediaType: item.mediaType,
+      thumbnailUrl: item.thumbnailUrl || null,
+      caption: item.title || item.description || "",
+      title: item.title || "",
+      description: item.description || "",
+      source: item.source || "gallery",
+      locked: false,
+      createdAt: item.createdAt,
+    }));
+
+    return res.json({
+      post: {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        authorUsername: req.user.username || req.user.email,
+      },
+      items: [...galleryItems, ...items],
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to load gallery" });
+  }
+});
+
+router.post("/posts/:id/gallery/upload", upload.single("file"), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const post = await prisma.post.findFirst({
+      where: { id, userId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const ext = path.extname(req.file.filename).toLowerCase();
+
+    const mediaType = [".mp4", ".webm", ".mov", ".ogg"].includes(ext)
+      ? "video"
+      : "image";
+
+    const url = `${publicUploadsBase}/uploads/blog/${userId}/${req.file.filename}`;
+
+    const item = await prisma.mediaItem.create({
+      data: {
+        userId,
+        postId: post.id,
+        url,
+        mediaType,
+        thumbnailUrl: null,
+        title: req.body.caption || "",
+        description: "",
+        source: "gallery",
+      },
+    });
+
+    return res.status(201).json({
+      item: {
+        id: item.id,
+        url: item.url,
+        mediaType: item.mediaType,
+        thumbnailUrl: item.thumbnailUrl || null,
+        caption: item.title || "",
+        title: item.title || "",
+        description: item.description || "",
+        source: item.source,
+        locked: false,
+        createdAt: item.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to upload gallery item" });
+  }
+});
+
+router.patch("/posts/:id/gallery/:itemId", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id, itemId } = req.params;
+    const { caption } = req.body;
+
+    const post = await prisma.post.findFirst({
+      where: { id, userId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const item = await prisma.mediaItem.findFirst({
+      where: {
+        id: itemId,
+        postId: id,
+        userId,
+      },
+    });
+
+    if (!item) {
+      return res.status(404).json({ error: "Gallery item not found" });
+    }
+
+    const updated = await prisma.mediaItem.update({
+      where: { id: item.id },
+      data: {
+        title: caption || "",
+      },
+    });
+
+    return res.json({
+      item: {
+        id: updated.id,
+        url: updated.url,
+        mediaType: updated.mediaType,
+        thumbnailUrl: updated.thumbnailUrl || null,
+        caption: updated.title || "",
+        title: updated.title || "",
+        description: updated.description || "",
+        source: updated.source,
+        locked: false,
+        createdAt: updated.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to update gallery item" });
+  }
+});
+
+router.delete("/posts/:id/gallery/:itemId", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id, itemId } = req.params;
+
+    const item = await prisma.mediaItem.findFirst({
+      where: {
+        id: itemId,
+        postId: id,
+        userId,
+      },
+    });
+
+    if (!item) {
+      return res.status(404).json({ error: "Gallery item not found" });
+    }
+
+    await prisma.mediaItem.delete({
+      where: { id: item.id },
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to delete gallery item" });
   }
 });
 

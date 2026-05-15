@@ -308,6 +308,15 @@ export default function EditPostPage() {
               <Link to="/dashboard" className="btn-secondary">
                 Back
               </Link>
+
+              {!isNew && (
+                <Link
+                  to={`/dashboard/posts/${id}/gallery`}
+                  className="btn-secondary"
+                >
+                  Edit Gallery
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => handleSave("DRAFT")}
