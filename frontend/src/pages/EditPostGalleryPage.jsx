@@ -18,6 +18,7 @@ export default function EditPostGalleryPage() {
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
+  const [uploadProgress, setUploadProgress] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -67,6 +68,8 @@ export default function EditPostGalleryPage() {
       setErr("Please choose one or more images or videos.");
       return;
     }
+
+    
   
     try {
       setUploading(true);
@@ -74,15 +77,21 @@ export default function EditPostGalleryPage() {
       setSavedMsg("");
   
       const uploadedItems = [];
+
+      setUploadProgress(`Uploading 0 of ${files.length}...`);
   
-      for (const selectedFile of files) {
+      for (let i = 0; i < files.length; i++) {
+        const selectedFile = files[i];
+      
+        setUploadProgress(`Uploading ${i + 1} of ${files.length}: ${selectedFile.name}`);
+      
         const uploaded = await apiUpload(
           `/me/posts/${id}/gallery/upload`,
           selectedFile,
           "file",
           { caption }
         );
-  
+      
         uploadedItems.push(uploaded.item || uploaded.media || uploaded);
       }
   
@@ -93,8 +102,9 @@ export default function EditPostGalleryPage() {
     } catch (error) {
       setErr(error.message || "Could not upload gallery items.");
     } finally {
-      setUploading(false);
-    }
+        setUploading(false);
+        setUploadProgress("");
+      }
   }
 
   async function updateCaption(itemId, nextCaption) {
@@ -266,57 +276,72 @@ export default function EditPostGalleryPage() {
 }
 
 function GalleryItemCard({ item, onSaveCaption, onRemove }) {
-  const [caption, setCaption] = useState(item.caption || "");
-
-  const mediaType =
-    item.mediaType ||
-    item.type ||
-    (/\.(mp4|webm|mov|ogg)$/i.test(item.url || "") ? "video" : "image");
-
-  return (
-    <article className="card overflow-hidden">
-      {mediaType === "video" ? (
-        <video
-          src={item.url}
-          controls
-          className="h-56 w-full bg-black object-cover"
-          poster={item.thumbnailUrl || undefined}
-          preload="metadata"
-        />
-      ) : (
-        <img
-          src={item.url}
-          alt={caption || "Gallery item"}
-          className="h-56 w-full object-cover"
-        />
-      )}
-
-      <div className="space-y-4 p-5">
-        <input
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Caption"
-          className="field-input"
-        />
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => onSaveCaption(item.id, caption)}
-            className="btn-secondary"
-          >
-            Save caption
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onRemove(item.id)}
-            className="btn-ghost text-red-700"
-          >
-            Remove
-          </button>
+    const [caption, setCaption] = useState(item.caption || "");
+  
+    const mediaType =
+      item.mediaType ||
+      item.type ||
+      (/\.(mp4|webm|mov|ogg)$/i.test(item.url || "")
+        ? "video"
+        : "image");
+  
+    return (
+      <article className="card overflow-hidden">
+        {mediaType === "video" ? (
+          <video
+            src={item.url}
+            controls
+            className="h-56 w-full bg-black object-cover"
+            poster={item.thumbnailUrl || undefined}
+            preload="metadata"
+          />
+        ) : (
+          <img
+            src={item.url}
+            alt={caption || "Gallery item"}
+            className="h-56 w-full object-cover"
+          />
+        )}
+  
+        <div className="space-y-4 p-5">
+          <input
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Caption"
+            className="field-input"
+          />
+  
+          {!item.locked ? (
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => onSaveCaption(item.id, caption)}
+                className="btn-secondary"
+              >
+                Save caption
+              </button>
+  
+              <button
+                type="button"
+                onClick={() => onRemove(item.id)}
+                className="btn-ghost text-red-700"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500">
+              This item comes from the post content or cover media.
+              Remove it from the post editor instead.
+            </div>
+          )}
+  
+          {item.source && (
+            <div className="text-xs uppercase tracking-wide text-slate-400">
+              Source: {item.source}
+            </div>
+          )}
         </div>
-      </div>
-    </article>
-  );
-}
+      </article>
+    );
+  }

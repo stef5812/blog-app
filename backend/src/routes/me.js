@@ -313,7 +313,7 @@ router.get("/posts/:id/gallery", async (req, res) => {
 
     function extractMedia(node) {
       if (!node) return;
-
+    
       if (node.type === "image" && node.attrs?.src) {
         items.push({
           id: `img-${items.length}`,
@@ -325,12 +325,12 @@ router.get("/posts/:id/gallery", async (req, res) => {
           locked: true,
         });
       }
-
+    
       if (Array.isArray(node.content)) {
         node.content.forEach(extractMedia);
       }
     }
-
+    
     extractMedia(post.contentJson);
 
     const galleryItems = post.mediaItems.map((item) => ({
