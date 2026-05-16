@@ -106,14 +106,7 @@ export default function PostGalleryPage() {
 
         {!loading && !err && (
           <>
-            <div className="mb-10">
-              <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-                {post?.title || "Gallery"}
-              </h1>
-              <p className="mt-3 text-slate-600">
-                Photos and videos from this post.
-              </p>
-            </div>
+
 
             {items.length === 0 ? (
               <div className="card p-8">
@@ -166,30 +159,38 @@ export default function PostGalleryPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      {activeItem.caption && (
-                        <p className="text-sm text-slate-700">
-                          {activeItem.caption}
-                        </p>
-                      )}
-                      <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">
-                        {activeItem.source} · {activeIndex + 1} of {items.length}
-                      </p>
-                    </div>
+<div className="flex flex-wrap items-center justify-between gap-4 p-5">
+  <div className="flex items-center gap-4 flex-wrap">
+    {activeItem.caption && (
+      <p className="text-sm text-slate-700">
+        {activeItem.caption}
+      </p>
+    )}
 
-                    {items.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => setPlaying((value) => !value)}
-                        className="btn-secondary"
-                      >
-                        {playing ? "Pause slideshow" : "Play slideshow"}
-                      </button>
-                    )}
-                  </div>
+    <p className="text-xs uppercase tracking-wide text-slate-400">
+      {activeItem.source} · {activeIndex + 1} of {items.length}
+    </p>
+  </div>
+
+  {items.length > 1 && (
+    <button
+      type="button"
+      onClick={() => setPlaying((value) => !value)}
+      className="btn-secondary"
+    >
+      {playing ? "Pause slideshow" : "Play slideshow"}
+    </button>
+  )}
+</div>
                 </section>
-
+                <div className="mb-10">
+              <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
+                {post?.title || "Gallery"}
+              </h1>
+              <p className="mt-3 text-slate-600">
+                Photos and videos from this post.
+              </p>
+            </div>
                 <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                   {items.map((item, index) => {
                     const mediaType = getMediaType(item);

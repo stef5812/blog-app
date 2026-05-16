@@ -215,12 +215,21 @@ export default function PublicProfilePage() {
                 : ""}
             </p>
 
-            <Link
-              to={`/blog/${profile.username}/post/${post.slug}`}
-              className="btn-primary bg-lime-600 hover:bg-lime-700"
-            >
-              Read post
-            </Link>
+            <div className="flex gap-2">
+  <Link
+    to={`/blog/${profile.username}/post/${post.slug}`}
+      className="btn-primary bg-lime-600 hover:bg-lime-700"
+    >
+      Read post
+    </Link>
+
+    <Link
+      to={`/blog/${profile.username}/post/${post.slug}/gallery`}
+      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+    >
+      Gallery
+    </Link>
+  </div>
           </div>
         </div>
       </div>
