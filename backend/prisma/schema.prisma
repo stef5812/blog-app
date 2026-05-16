@@ -50,6 +50,17 @@ model MediaItem {
   @@index([postId])
 }
 
+model PageVisit {
+  id        Int      @id @default(autoincrement())
+  visitorId String
+  path      String
+  title     String?
+  referrer  String?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
 model Post {
   id                String     @id @default(cuid())
   userId            String
