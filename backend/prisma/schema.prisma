@@ -61,6 +61,20 @@ model PageVisit {
   createdAt DateTime @default(now())
 }
 
+model BlogSubscription {
+  id         String   @id @default(cuid())
+  authUserId String
+  email      String
+  blogId     String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([authUserId, blogId])
+}
+
 model Post {
   id                String     @id @default(cuid())
   userId            String

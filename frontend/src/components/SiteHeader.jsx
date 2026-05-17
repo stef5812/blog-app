@@ -185,7 +185,7 @@ export default function SiteHeader({ me, setMe }) {
               to="/directory"
               className="text-sm font-medium text-slate-700 hover:text-lime-700"
             >
-              Directory
+              Browse blogs
             </Link>
 
             {isLoggedIn && (

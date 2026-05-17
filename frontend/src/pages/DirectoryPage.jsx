@@ -51,6 +51,41 @@ export default function DirectoryPage() {
     };
   }, []);
 
+  const [loginMessage, setLoginMessage] = useState("");
+
+  async function handleSubscribeClick(blog) {
+    if (!me) {
+      setLoginMessage(
+        "You need to log in or register to receive blog notifications."
+      );
+  
+      setTimeout(() => {
+        const next = encodeURIComponent(window.location.href);
+  
+        window.location.href =
+          `https://auth.stefandodds.ie/login?from=blog-app&next=${next}`;
+      }, 1200);
+  
+      return;
+    }
+  
+    try {
+      await apiFetch(`/public/blogs/${blog.username}/subscribe`, {
+        method: "POST",
+      });
+  
+      setBlogs((prev) =>
+        prev.map((b) =>
+          b.id === blog.id
+            ? { ...b, subscribed: true }
+            : b
+        )
+      );
+    } catch (error) {
+      alert(error.message || "Subscription failed");
+    }
+  }  
+
   return (
     <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_28%,#ffffff_100%)]">
       <SiteHeader me={me} />
@@ -64,7 +99,16 @@ export default function DirectoryPage() {
               <p className="mt-2 text-slate-600">
                 Explore writers, themes, and published travel stories.
               </p>
+
+              {loginMessage && (
+                <div className="mt-3 rounded-xl border border-lime-200 bg-lime-50 px-4 py-3 text-sm text-lime-800">
+                  {loginMessage}
+                </div>
+              )}
+
             </div>
+
+
 
             {!loading && !err && (
               <span className="rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-lime-800">
@@ -153,13 +197,23 @@ export default function DirectoryPage() {
                     {blog.postCount === 1 ? "" : "s"}
                   </div>
 
-                  <div className="mt-6">
-                    <Link
-                      to={`/blog/${blog.username}`}
-                      className="btn-primary bg-lime-600 hover:bg-lime-700"
-                    >
-                      Open blog
-                    </Link>
+                  <div className="mt-6 space-y-3">
+  <Link
+    to={`/blog/${blog.username}`}
+    className="btn-primary bg-lime-600 hover:bg-lime-700"
+  >
+    Open blog
+  </Link>
+
+                    <label className="flex items-center gap-2 text-sm text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={blog.subscribed || false}
+                        onChange={() => handleSubscribeClick(blog)}
+                        className="rounded border-slate-300"
+                      />
+                      Email me when this blog publishes new posts
+                    </label>
                   </div>
                 </article>
               ))}
