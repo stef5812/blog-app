@@ -11,6 +11,7 @@ import adminRoutes from "./routes/admin.js";
 import uploadRoutes from "./routes/uploads.js";
 import aiRoutes from "./routes/ai.routes.js";
 import mediaRoutes from "./routes/media.js";
+import subscriptionRoutes from "./routes/subscriptions.js";
 
 const app = express();
 
@@ -39,9 +40,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/me/ai", aiRoutes);
-
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
 app.use("/api/media", mediaRoutes);
 
 app.get("/health", (req, res) => {
@@ -53,11 +52,15 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/admin", adminRoutes);
+
+// Important: subscription routes must come before general public routes
+app.use("/api/public/blogs", subscriptionRoutes);
 app.use("/api/public", publicRoutes);
+
 app.use("/api/me", meRoutes);
 app.use("/api/uploads", uploadRoutes);
 
-const port = Number(process.env.PORT || 3005);
+const port = Number(process.env.PORT || 3008);
 
 app.listen(port, () => {
   console.log(`blog-app backend listening on http://localhost:${port}`);

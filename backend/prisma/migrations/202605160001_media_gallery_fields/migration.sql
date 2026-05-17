@@ -1,0 +1,3 @@
+-- Local placeholder migration.
+-- This migration was already applied to the database.
+-- It exists locally so Prisma migration history matches the database.

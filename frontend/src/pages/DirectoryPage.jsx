@@ -29,7 +29,32 @@ export default function DirectoryPage() {
           );
 
           setMe(auth || null);
-          setBlogs(blogsWithPosts);
+          const blogsWithSubscriptionStatus = auth
+          ? await Promise.all(
+              blogsWithPosts.map(async (blog) => {
+                try {
+                  const status = await apiFetch(
+                    `/public/blogs/${blog.username}/subscription`
+                  );
+
+                  return {
+                    ...blog,
+                    subscribed: !!status.subscribed,
+                  };
+                } catch {
+                  return {
+                    ...blog,
+                    subscribed: false,
+                  };
+                }
+              })
+            )
+          : blogsWithPosts.map((blog) => ({
+              ...blog,
+              subscribed: false,
+            }));
+
+        setBlogs(blogsWithSubscriptionStatus);
           setErr("");
         }
       } catch (error) {
@@ -62,8 +87,12 @@ export default function DirectoryPage() {
       setTimeout(() => {
         const next = encodeURIComponent(window.location.href);
   
+        const AUTH_UI_BASE = import.meta.env.DEV
+          ? "http://localhost:5173"
+          : "https://auth.stefandodds.ie";
+  
         window.location.href =
-          `https://auth.stefandodds.ie/login?from=blog-app&next=${next}`;
+          `${AUTH_UI_BASE}/login?from=blog-app&next=${next}`;
       }, 1200);
   
       return;
@@ -84,7 +113,7 @@ export default function DirectoryPage() {
     } catch (error) {
       alert(error.message || "Subscription failed");
     }
-  }  
+  }
 
   return (
     <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_28%,#ffffff_100%)]">

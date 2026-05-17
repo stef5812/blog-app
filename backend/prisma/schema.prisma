@@ -27,6 +27,7 @@ model BlogProfile {
   updatedAt       DateTime @updatedAt
 
   posts           Post[]
+  subscriptions   BlogSubscription[]
 
   @@index([username])
 }
@@ -70,7 +71,7 @@ model BlogSubscription {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog BlogProfile @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
   @@unique([authUserId, blogId])
 }
