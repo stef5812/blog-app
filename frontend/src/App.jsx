@@ -1,6 +1,14 @@
 // frontend/src/App.jsx
 
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+
 import HomePage from "./pages/HomePage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import PublicPostPage from "./pages/PublicPostPage";
@@ -13,9 +21,41 @@ import MediaLibraryPage from "./pages/MediaLibraryPage";
 import PostGalleryPage from "./pages/PostGalleryPage";
 import EditPostGalleryPage from "./pages/EditPostGalleryPage";
 
+function VisitTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const visitorIdKey = "blog_app_visitor_id";
+
+    let visitorId = localStorage.getItem(visitorIdKey);
+    if (!visitorId) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem(visitorIdKey, visitorId);
+    }
+
+    fetch("/blog-app/api/visits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        visitorId,
+        path: window.location.pathname + window.location.search,
+        title: document.title,
+        referrer: document.referrer || null,
+      }),
+    }).catch(() => {});
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter basename="/blog-app">
+      <VisitTracker />
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/directory" element={<DirectoryPage />} />
