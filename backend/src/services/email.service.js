@@ -14,7 +14,7 @@ export async function sendNewPostEmail({ to, post, blog }) {
   const url = `https://stefandodds.ie/blog-app/${blog.username}/${post.slug}`;
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
+    from: process.env.SMTP_FROM,
     to,
     subject: `New post: ${post.title}`,
     text: `A new post has been published on ${blog.title || blog.username}.\n\n${post.title}\n\nRead it here:\n${url}`,
