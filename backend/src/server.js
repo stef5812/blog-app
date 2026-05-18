@@ -12,6 +12,7 @@ import uploadRoutes from "./routes/uploads.js";
 import aiRoutes from "./routes/ai.routes.js";
 import mediaRoutes from "./routes/media.js";
 import subscriptionRoutes from "./routes/subscriptions.js";
+import visitsRoutes from "./routes/visits.js";
 
 const app = express();
 
@@ -59,6 +60,8 @@ app.use("/api/public", publicRoutes);
 
 app.use("/api/me", meRoutes);
 app.use("/api/uploads", uploadRoutes);
+
+app.use("/api/visits", visitsRoutes);
 
 const port = Number(process.env.PORT || 3008);
 
