@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { apiFetch, authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
 
+
 export default function DirectoryPage() {
   const [me, setMe] = useState(null);
   const [blogs, setBlogs] = useState([]);
@@ -36,6 +37,7 @@ export default function DirectoryPage() {
                   const status = await apiFetch(
                     `/public/blogs/${blog.username}/subscription`
                   );
+
 
                   return {
                     ...blog,
@@ -123,7 +125,7 @@ export default function DirectoryPage() {
         <div className="page-wrap">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-lime-700">Directory</p>
+              <p className="text-sm font-medium text-lime-700">Blog list</p>
               <h1 className="section-title">Browse public blogs</h1>
               <p className="mt-2 text-slate-600">
                 Explore writers, themes, and published travel stories.
