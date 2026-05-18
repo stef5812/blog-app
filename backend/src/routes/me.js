@@ -9,6 +9,8 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
+import { notifyBlogSubscribers } from "../services/notifySubscribers.service.js";
+
 const router = Router();
 
 const publicUploadsBase = process.env.PUBLIC_UPLOADS_BASE || "";
@@ -270,7 +272,17 @@ router.put("/posts/:id", async (req, res) => {
     const updated = await prisma.post.update({
       where: { id },
       data,
+    
+      include: {
+        blogProfile: true,
+      },
     });
+    
+    if (status === "PUBLISHED" && !existing.publishedAt) {
+      notifyBlogSubscribers(updated).catch((error) => {
+        console.error("Failed to notify blog subscribers:", error);
+      });
+    }
 
     return res.json(updated);
   } catch (err) {
