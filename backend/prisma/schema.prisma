@@ -110,7 +110,13 @@ enum TravelMode {
   TRAIN
   BUS
   PLANE
+  FERRY
   OTHER
+}
+
+enum BookingStatus {
+  BOOKED
+  NOT_BOOKED
 }
 
 enum TravelGroup {
@@ -135,6 +141,7 @@ model BlogWaypoint {
 
   travelMode  TravelMode
   customMode  String?
+  bookingStatus BookingStatus @default(BOOKED)
   travelGroup TravelGroup
   startedAt   DateTime?
 
