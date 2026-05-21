@@ -36,7 +36,7 @@ function VisitTracker() {
       localStorage.setItem(visitorIdKey, visitorId);
     }
 
-    fetch("/api/visits", {
+    fetch(`${import.meta.env.DEV ? "" : "/blog-app"}/api/visits`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
