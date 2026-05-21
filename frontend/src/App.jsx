@@ -20,6 +20,9 @@ import DirectoryPage from "./pages/DirectoryPage";
 import MediaLibraryPage from "./pages/MediaLibraryPage";
 import PostGalleryPage from "./pages/PostGalleryPage";
 import EditPostGalleryPage from "./pages/EditPostGalleryPage";
+import WaypointsPage from "./pages/WaypointsPage";
+import WaypointCreatePage from "./pages/WaypointCreatePage";
+import PublicJourneyPage from "./pages/PublicJourneyPage";
 
 function VisitTracker() {
   const location = useLocation();
@@ -33,7 +36,7 @@ function VisitTracker() {
       localStorage.setItem(visitorIdKey, visitorId);
     }
 
-    fetch("/blog-app/api/visits", {
+    fetch("/api/visits", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,6 +64,11 @@ function App() {
         <Route path="/directory" element={<DirectoryPage />} />
         <Route path="/blog/:username" element={<PublicProfilePage />} />
         <Route path="/blog/:username/post/:slug" element={<PublicPostPage />} />
+        <Route path="/dashboard/waypoints" element={<WaypointsPage />} />
+        <Route
+  path="/blog/:username/journey"
+  element={<PublicJourneyPage />}
+/>
 
         <Route
           path="/blog/:username/post/:slug/gallery"
@@ -76,6 +84,13 @@ function App() {
           path="/dashboard/posts/:id/gallery"
           element={<EditPostGalleryPage />}
         />
+
+        <Route
+          path="/dashboard/posts/:id/waypoints"
+          element={<WaypointsPage />}
+        />
+
+        <Route path="/dashboard/waypoints/new" element={<WaypointCreatePage />} />
 
         <Route path="/dashboard/admin" element={<AdminPage />} />
         <Route path="/media" element={<MediaLibraryPage />} />

@@ -13,9 +13,9 @@ enum PostStatus {
 }
 
 model BlogProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  username        String   @unique
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  username        String         @unique
   displayName     String?
   bio             String?
   avatarUrl       String?
@@ -23,11 +23,12 @@ model BlogProfile {
   siteTitle       String?
   siteDescription String?
   themeAccent     String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  waypoints       BlogWaypoint[]
 
-  posts           Post[]
-  subscriptions   BlogSubscription[]
+  posts         Post[]
+  subscriptions BlogSubscription[]
 
   @@index([username])
 }
@@ -37,7 +38,7 @@ model MediaItem {
   userId       String
   postId       String?
   url          String
-  mediaType    String   // "image" or "video"
+  mediaType    String // "image" or "video"
   title        String?
   description  String?
   thumbnailUrl String?
@@ -45,7 +46,7 @@ model MediaItem {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  post         Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([postId])
@@ -77,7 +78,7 @@ model BlogSubscription {
 }
 
 model Post {
-  id                String     @id @default(cuid())
+  id                String             @id @default(cuid())
   userId            String
   blogProfileId     String
   title             String
@@ -87,16 +88,72 @@ model Post {
   coverMediaType    String?
   coverThumbnailUrl String?
   contentJson       Json
-  status            PostStatus @default(DRAFT)
+  status            PostStatus         @default(DRAFT)
   publishedAt       DateTime?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  waypointLinks     BlogWaypointPost[]
 
-  blogProfile       BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
-  mediaItems        MediaItem[]
+  blogProfile BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
+  mediaItems  MediaItem[]
 
   @@unique([blogProfileId, slug])
   @@index([userId])
   @@index([status])
   @@index([publishedAt])
+}
+
+enum TravelMode {
+  FOOT
+  BIKE
+  CAR
+  TRAIN
+  BUS
+  PLANE
+  OTHER
+}
+
+enum TravelGroup {
+  ALONE
+  FRIEND
+  PARTNER
+  GROUP
+}
+
+model BlogWaypoint {
+  id            String @id @default(cuid())
+  blogProfileId String
+
+  title    String?
+  fromName String
+  fromLat  Float
+  fromLng  Float
+
+  toName String
+  toLat  Float
+  toLng  Float
+
+  travelMode  TravelMode
+  customMode  String?
+  travelGroup TravelGroup
+  startedAt   DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blogProfile BlogProfile        @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
+  posts       BlogWaypointPost[]
+}
+
+model BlogWaypointPost {
+  id         String @id @default(cuid())
+  waypointId String
+  postId     String
+
+  waypoint BlogWaypoint @relation(fields: [waypointId], references: [id], onDelete: Cascade)
+  post     Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([waypointId, postId])
 }

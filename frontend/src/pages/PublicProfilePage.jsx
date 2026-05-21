@@ -102,39 +102,93 @@ export default function PublicProfilePage() {
 
           {!loading && !err && profile && (
             <>
-              <section className="card border-lime-100 p-6 sm:p-8">
-                <p className="text-sm text-slate-500">@{profile.username}</p>
+<section className="relative overflow-hidden rounded-3xl border border-lime-100 bg-gradient-to-br from-lime-50 via-white to-sky-50 p-6 shadow-sm sm:p-8">
+  <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-lime-200/30 blur-3xl" />
+  <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-sky-200/30 blur-3xl" />
 
-                <h1 className="section-title">
-                  {profile.siteTitle || profile.displayName || profile.username}
-                </h1>
+  <div className="relative z-10">
+    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-lime-700">
+          @{profile.username}
+        </p>
 
-                {profile.siteDescription && (
-                  <p className="mt-3 text-slate-600">{profile.siteDescription}</p>
-                )}
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          {profile.siteTitle ||
+            profile.displayName ||
+            profile.username}
+        </h1>
 
-                {profile.bio && (
-                  <p className="mt-4 text-slate-600">{profile.bio}</p>
-                )}
+        {profile.siteDescription && (
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
+            {profile.siteDescription}
+          </p>
+        )}
 
-                {isOwner && (
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      to="/dashboard"
-                      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
-                    >
-                      Dashboard
-                    </Link>
+        {profile.bio && (
+          <p className="mt-4 max-w-3xl leading-7 text-slate-600">
+            {profile.bio}
+          </p>
+        )}
+      </div>
 
-                    <Link
-                      to="/dashboard/settings"
-                      className="btn-ghost"
-                    >
-                      Edit settings
-                    </Link>
-                  </div>
-                )}
-              </section>
+      <div className="flex shrink-0 flex-col gap-3">
+        <Link
+          to={`/blog/${profile.username}/journey`}
+          className="rounded-xl bg-lime-600 px-5 py-3 text-center font-medium text-white shadow hover:bg-lime-700"
+        >
+          🗺 Open Journey Map
+        </Link>
+
+        <Link
+          to={`/blog/${profile.username}`}
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center font-medium text-slate-700 hover:bg-slate-50"
+        >
+          ✈ Travel Timeline
+        </Link>
+      </div>
+    </div>
+
+    <div className="mt-8 flex flex-wrap gap-3">
+      <div className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+        🌍 Travel Blog
+      </div>
+
+      <div className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+        📝 {posts.length} post{posts.length === 1 ? "" : "s"}
+      </div>
+
+      <div className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+        🚆 Journey Routes
+      </div>
+    </div>
+
+    {isOwner && (
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          to="/dashboard"
+          className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+        >
+          Dashboard
+        </Link>
+
+        <Link
+          to="/dashboard/settings"
+          className="btn-ghost"
+        >
+          Edit settings
+        </Link>
+
+        <Link
+          to="/dashboard/waypoints"
+          className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 font-medium text-sky-800 hover:bg-sky-100"
+        >
+          Manage Journey Map
+        </Link>
+      </div>
+    )}
+  </div>
+</section>
 
               <section className="mt-6 card border-lime-100 p-6 sm:p-8">
                 <div className="flex items-center justify-between">

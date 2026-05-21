@@ -305,35 +305,46 @@ export default function EditPostPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link to="/dashboard" className="btn-secondary">
-                Back
-              </Link>
+  <Link to="/dashboard" className="btn-secondary">
+    Back
+  </Link>
 
-              {!isNew && (
-                <Link
-                  to={`/dashboard/posts/${id}/gallery`}
-                  className="btn-secondary"
-                >
-                  Edit Gallery
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={() => handleSave("DRAFT")}
-                disabled={saving}
-                className="btn-secondary disabled:opacity-60"
-              >
-                Save draft
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSave("PUBLISHED")}
-                disabled={saving}
-                className="btn-primary disabled:opacity-60"
-              >
-                Publish
-              </button>
-            </div>
+  {!isNew && (
+    <>
+      <Link
+        to={`/dashboard/posts/${id}/gallery`}
+        className="btn-secondary"
+      >
+        Edit Gallery
+      </Link>
+
+      <Link
+        to={`/dashboard/posts/${id}/waypoints`}
+        className="btn-secondary"
+      >
+        Add Waypoint
+      </Link>
+    </>
+  )}
+
+  <button
+    type="button"
+    onClick={() => handleSave("DRAFT")}
+    disabled={saving}
+    className="btn-secondary disabled:opacity-60"
+  >
+    Save Draft
+  </button>
+
+  <button
+    type="button"
+    onClick={() => handleSave("PUBLISHED")}
+    disabled={saving}
+    className="btn-primary disabled:opacity-60"
+  >
+    Publish
+  </button>
+</div>
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">

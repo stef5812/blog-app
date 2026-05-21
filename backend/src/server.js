@@ -14,6 +14,8 @@ import mediaRoutes from "./routes/media.js";
 import subscriptionRoutes from "./routes/subscriptions.js";
 import visitsRoutes from "./routes/visits.js";
 
+import meWaypointRoutes from "./routes/me.waypoints.js";
+
 const app = express();
 
 const allowedOrigins = (process.env.CORS_ORIGINS || "")
@@ -43,6 +45,9 @@ app.use((req, res, next) => {
 app.use("/api/me/ai", aiRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/media", mediaRoutes);
+
+app.use("/api/me/waypoints", meWaypointRoutes);
+app.use("/api/me", meRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ ok: true, app: "blog-app" });

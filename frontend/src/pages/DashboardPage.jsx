@@ -269,6 +269,10 @@ export default function DashboardPage() {
                         View public blog
                       </Link>
 
+                      <Link to="/dashboard/waypoints" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
+                        Add waypoint
+                      </Link>
+
                       <Link to="/dashboard/settings" className="btn-ghost">
                         Edit settings
                       </Link>

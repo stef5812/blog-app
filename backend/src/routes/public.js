@@ -180,6 +180,37 @@ router.get("/blogs/:username/posts/:slug", async (req, res) => {
   }
 });
 
+router.get("/blogs/:username/waypoints", async (req, res) => {
+  try {
+    const username = String(req.params.username || "")
+      .replace(/^@/, "")
+      .trim();
+
+    const profile = await prisma.blogProfile.findUnique({
+      where: { username },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: "Blog not found." });
+    }
+
+    const waypoints = await prisma.blogWaypoint.findMany({
+      where: {
+        blogProfileId: profile.id,
+      },
+      orderBy: [
+        { startedAt: "asc" },
+        { createdAt: "asc" },
+      ],
+    });
+
+    res.json(waypoints);
+  } catch (error) {
+    console.error("GET public waypoints error:", error);
+    res.status(500).json({ error: "Failed to load journey map." });
+  }
+});
+
 // Public post gallery
 router.get("/blogs/:username/posts/:slug/gallery", async (req, res) => {
   try {
