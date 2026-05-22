@@ -171,22 +171,6 @@ export default function PublicJourneyPage() {
           {!loading && !err && apiKey && (
             <>
               <section className="card overflow-hidden border-lime-100">
-                <div className="border-b border-lime-100 bg-white p-4">
-                  <div className="flex flex-wrap gap-3 text-sm">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                      Solid line = completed/current
-                    </span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                      Broken line = future booked
-                    </span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                      Dotted line = future not booked
-                    </span>
-                    <span className="rounded-full bg-cyan-50 px-3 py-1 text-cyan-800">
-                      ⛴️ Ferry supported
-                    </span>
-                  </div>
-                </div>
 
                 <div className="h-[650px] bg-slate-100">
                   <APIProvider apiKey={apiKey}>
@@ -255,6 +239,22 @@ export default function PublicJourneyPage() {
                     </Map>
                   </APIProvider>
                 </div>
+                <div className="border-b border-lime-100 bg-white p-4">
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                      Solid line = completed/current
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                      Broken line = future booked
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                      Dotted line = future not booked
+                    </span>
+                    <span className="rounded-full bg-cyan-50 px-3 py-1 text-cyan-800">
+                      ⛴️ Ferry supported
+                    </span>
+                  </div>
+                </div>                
               </section>
 
               <section className="mt-6 grid gap-4 md:grid-cols-2">
