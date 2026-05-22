@@ -1,10 +1,14 @@
+// frontend/src/pages/waypointcreatepage.jsx
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { apiFetch, authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
 
 const travelModes = ["FOOT", "BIKE", "CAR", "TRAIN", "BUS", "PLANE", "FERRY", "OTHER"];
-const travelGroups = ["PAST", "CURRENT", "FUTURE"];
+
+const travelGroups = ["ALONE", "FRIEND", "PARTNER", "GROUP"];
+
 const bookingStatuses = ["BOOKED", "NOT_BOOKED"];
 
 const emptyForm = {
@@ -16,7 +20,7 @@ const emptyForm = {
   toLat: "",
   toLng: "",
   travelMode: "TRAIN",
-  travelGroup: "FUTURE",
+  travelGroup: "ALONE",
   bookingStatus: "BOOKED",
   startedAt: "",
   notes: "",
@@ -43,7 +47,8 @@ export default function WaypointCreatePage() {
         if (!ignore) setMe(auth || null);
 
         if (isEdit) {
-          const wp = await apiFetch(`/me/waypoints/${id}`);
+          const data = await apiFetch(`/me/waypoints/${id}`);
+          const wp = data?.waypoint;
 
           if (!ignore) {
             setForm({
@@ -55,7 +60,7 @@ export default function WaypointCreatePage() {
               toLat: wp.toLat ?? "",
               toLng: wp.toLng ?? "",
               travelMode: wp.travelMode || "TRAIN",
-              travelGroup: wp.travelGroup || "FUTURE",
+              travelGroup: wp.travelGroup || "ALONE",
               bookingStatus: wp.bookingStatus || "BOOKED",
               startedAt: wp.startedAt ? wp.startedAt.slice(0, 10) : "",
               notes: wp.notes || "",

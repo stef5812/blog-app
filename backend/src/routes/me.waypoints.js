@@ -145,4 +145,127 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const authUserId = getAuthUserId(req);
+    const { id } = req.params;
+
+    const blogProfile = await prisma.blogProfile.findUnique({
+      where: { userId: authUserId },
+    });
+
+    if (!blogProfile) {
+      return res.status(404).json({ error: "Blog profile not found." });
+    }
+
+    const waypoint = await prisma.blogWaypoint.findFirst({
+      where: {
+        id,
+        blogProfileId: blogProfile.id,
+      },
+      include: {
+        posts: {
+          include: {
+            post: true,
+          },
+        },
+      },
+    });
+
+    if (!waypoint) {
+      return res.status(404).json({ error: "Waypoint not found." });
+    }
+
+    return res.json({ waypoint });
+  } catch (error) {
+    console.error("GET /api/me/waypoints/:id error:", error);
+    return res.status(500).json({ error: "Failed to load waypoint." });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const authUserId = getAuthUserId(req);
+    const { id } = req.params;
+
+    const blogProfile = await prisma.blogProfile.findUnique({
+      where: { userId: authUserId },
+    });
+
+    if (!blogProfile) {
+      return res.status(404).json({ error: "Blog profile not found." });
+    }
+
+    const waypoint = await prisma.blogWaypoint.findFirst({
+      where: {
+        id,
+        blogProfileId: blogProfile.id,
+      },
+    });
+
+    if (!waypoint) {
+      return res.status(404).json({ error: "Waypoint not found." });
+    }
+
+    await prisma.blogWaypoint.delete({
+      where: { id: waypoint.id },
+    });
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("DELETE /api/me/waypoints/:id error:", error);
+    return res.status(500).json({ error: "Failed to delete waypoint." });
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const authUserId = getAuthUserId(req);
+    const { id } = req.params;
+
+    const blogProfile = await prisma.blogProfile.findUnique({
+      where: { userId: authUserId },
+    });
+
+    if (!blogProfile) {
+      return res.status(404).json({ error: "Blog profile not found." });
+    }
+
+    const existing = await prisma.blogWaypoint.findFirst({
+      where: {
+        id,
+        blogProfileId: blogProfile.id,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Waypoint not found." });
+    }
+
+    const updated = await prisma.blogWaypoint.update({
+      where: { id: existing.id },
+      data: {
+        title: req.body.title || null,
+        fromName: req.body.fromName,
+        fromLat: Number(req.body.fromLat),
+        fromLng: Number(req.body.fromLng),
+        toName: req.body.toName,
+        toLat: Number(req.body.toLat),
+        toLng: Number(req.body.toLng),
+        travelMode: req.body.travelMode || "FOOT",
+        customMode: req.body.travelMode === "OTHER" ? req.body.customMode || null : null,
+        travelGroup: req.body.travelGroup || "ALONE",
+        bookingStatus: req.body.bookingStatus || "BOOKED",
+        startedAt: req.body.startedAt ? new Date(req.body.startedAt) : null,
+        notes: req.body.notes || null,
+      },
+    });
+
+    return res.json({ waypoint: updated });
+  } catch (error) {
+    console.error("PUT /api/me/waypoints/:id error:", error);
+    return res.status(500).json({ error: "Failed to update waypoint." });
+  }
+});
+
 export default router;
