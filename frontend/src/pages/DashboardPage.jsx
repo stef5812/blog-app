@@ -63,7 +63,8 @@ export default function DashboardPage() {
           return;
         }
 
-        const postsData = await apiFetch("/me/posts").catch(() => []);
+        // const postsData = await apiFetch("/me/posts").catch(() => []);
+        const postsData = await apiFetch("/me/posts");
 
         if (!ignore) {
           setPosts(Array.isArray(postsData) ? postsData : []);

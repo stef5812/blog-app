@@ -1,3 +1,5 @@
+// frontend/src/pages/WaypointsPage.jsx
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch, authMe } from "../lib/api";
@@ -36,7 +38,15 @@ export default function WaypointsPage() {
         if (ignore) return;
 
         setMe(auth || null);
-        setWaypoints(Array.isArray(data?.waypoints) ? data.waypoints : []);
+        setWaypoints(
+          Array.isArray(data?.waypoints)
+            ? [...data.waypoints].sort(
+                (a, b) =>
+                  new Date(b.startedAt || b.createdAt || 0) -
+                  new Date(a.startedAt || a.createdAt || 0)
+              )
+            : []
+        );
       } catch (error) {
         if (!ignore) {
           setErr(error.message || "Could not load waypoints.");
