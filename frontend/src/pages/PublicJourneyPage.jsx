@@ -258,56 +258,71 @@ export default function PublicJourneyPage() {
               </section>
 
               <section className="mt-6 grid gap-4 md:grid-cols-2">
-                {waypoints.length === 0 ? (
-                  <div className="card border-lime-100 p-6">
-                    No journey routes have been added yet.
-                  </div>
-                ) : (
-                  waypoints.map((wp) => {
-                    const style =
-                      travelStyles[wp.travelMode] || travelStyles.OTHER;
+  {waypoints.length === 0 ? (
+    <div className="card border-lime-100 p-6">
+      No journey routes have been added yet.
+    </div>
+  ) : (
+    [...waypoints]
+      .sort((a, b) => {
+        const aDate = a.startedAt
+          ? new Date(a.startedAt).getTime()
+          : 0;
 
-                    const isFuture =
-                      wp.startedAt && new Date(wp.startedAt) > new Date();
+        const bDate = b.startedAt
+          ? new Date(b.startedAt).getTime()
+          : 0;
 
-                    return (
-                      <article
-                        key={wp.id}
-                        className="rounded-2xl border border-lime-100 bg-white p-5 shadow-sm"
-                      >
-                        <h2 className="text-lg font-semibold text-slate-950">
-                          {style.icon}{" "}
-                          {wp.title || `${wp.fromName} → ${wp.toName}`}
-                        </h2>
+        return bDate - aDate;
+      })
+      .map((wp) => {
+        const style =
+          travelStyles[wp.travelMode] || travelStyles.OTHER;
 
-                        <p className="mt-2 text-sm text-slate-600">
-                          {wp.fromName} → {wp.toName}
-                        </p>
+        const isFuture =
+          wp.startedAt && new Date(wp.startedAt) > new Date();
 
-                        <p className="mt-2 text-sm text-slate-500">
-                          {style.label} · {wp.travelGroup}
-                          {wp.startedAt
-                            ? ` · ${new Date(wp.startedAt).toLocaleDateString()}`
-                            : ""}
-                        </p>
+        return (
+          <article
+            key={wp.id}
+            className="rounded-2xl border border-lime-100 bg-white p-5 shadow-sm"
+          >
+            <h2 className="text-lg font-semibold text-slate-950">
+              {style.icon}{" "}
+              {wp.title || `${wp.fromName} → ${wp.toName}`}
+            </h2>
 
-                        <p className="mt-2 text-sm text-slate-500">
-                          {isFuture ? "Future route" : "Completed/current route"} ·{" "}
-                          {wp.bookingStatus === "NOT_BOOKED"
-                            ? "Not booked yet"
-                            : "Booked"}
-                        </p>
+            <p className="mt-2 text-sm text-slate-600">
+              {wp.fromName} → {wp.toName}
+            </p>
 
-                        {wp.notes && (
-                          <p className="mt-3 text-sm leading-6 text-slate-600">
-                            {wp.notes}
-                          </p>
-                        )}
-                      </article>
-                    );
-                  })
-                )}
-              </section>
+            <p className="mt-2 text-sm text-slate-500">
+              {style.label} · {wp.travelGroup}
+              {wp.startedAt
+                ? ` · ${new Date(wp.startedAt).toLocaleDateString()}`
+                : ""}
+            </p>
+
+            <p className="mt-2 text-sm text-slate-500">
+              {isFuture
+                ? "Future route"
+                : "Completed/current route"}{" "}
+              ·{" "}
+              {wp.bookingStatus === "NOT_BOOKED"
+                ? "Not booked yet"
+                : "Booked"}
+            </p>
+
+            {wp.notes && (
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {wp.notes}
+              </p>
+            )}
+          </article>
+        );
+      })
+  )}
+</section>
             </>
           )}
         </div>
