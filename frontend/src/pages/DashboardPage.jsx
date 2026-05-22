@@ -273,15 +273,8 @@ export default function DashboardPage() {
                         Add waypoint
                       </Link>
 
-                      <Link
-                        to="/blog-app/dashboard/waypoints"
-                        className="btn-secondary"
-                      >
+                      <Link to="/dashboard/waypoints" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
                         Edit waypoints
-                      </Link>                      
-
-                      <Link to="/dashboard/settings" className="btn-ghost">
-                        Edit settings
                       </Link>
                     </div>
                   </div>
