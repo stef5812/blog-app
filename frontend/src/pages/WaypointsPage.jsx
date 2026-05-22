@@ -1,151 +1,160 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  APIProvider,
-  Map,
-  Marker,
-  Polyline,
-} from "@vis.gl/react-google-maps";
-import { apiFetch } from "../lib/api";
+import { apiFetch, authMe } from "../lib/api";
+import SiteHeader from "../components/SiteHeader";
 
-const travelStyles = {
-  FOOT: { label: "Foot", color: "#16a34a", icon: "🚶" },
-  BIKE: { label: "Bike", color: "#22c55e", icon: "🚲" },
-  CAR: { label: "Car", color: "#2563eb", icon: "🚗" },
-  TRAIN: { label: "Train", color: "#9333ea", icon: "🚆" },
-  BUS: { label: "Bus", color: "#f59e0b", icon: "🚌" },
-  PLANE: { label: "Plane", color: "#dc2626", icon: "✈️" },
-  OTHER: { label: "Other", color: "#64748b", icon: "📍" },
+const travelLabels = {
+  FOOT: "🚶 Foot",
+  BIKE: "🚲 Bike",
+  CAR: "🚗 Car",
+  TRAIN: "🚆 Train",
+  BUS: "🚌 Bus",
+  PLANE: "✈️ Plane",
+  FERRY: "⛴️ Ferry",
+  OTHER: "📍 Other",
 };
 
 export default function WaypointsPage() {
+  const [me, setMe] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
   useEffect(() => {
-    async function loadWaypoints() {
+    let ignore = false;
+
+    async function load() {
       try {
-        const data = await apiFetch("/me/waypoints");
-        setWaypoints(data.waypoints || []);
+        setLoading(true);
+        setErr("");
+
+        const [auth, data] = await Promise.all([
+          authMe().catch(() => null),
+          apiFetch("/me/waypoints"),
+        ]);
+
+        if (ignore) return;
+
+        setMe(auth || null);
+        setWaypoints(Array.isArray(data) ? data : []);
       } catch (error) {
-        setErr(error.message || "Failed to load waypoints.");
+        if (!ignore) {
+          setErr(error.message || "Could not load waypoints.");
+          setWaypoints([]);
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }
 
-    loadWaypoints();
+    load();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  const center = useMemo(() => {
-    if (!waypoints.length) {
-      return { lat: 53.3498, lng: -6.2603 };
-    }
-
-    return {
-      lat: Number(waypoints[0].fromLat),
-      lng: Number(waypoints[0].fromLng),
-    };
-  }, [waypoints]);
-
-  if (loading) return <p>Loading waypoints...</p>;
-
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Journey Map</h1>
-          <p className="text-sm text-slate-600">
-            Manage the places and routes attached to your blog.
-          </p>
-        </div>
+    <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_35%,#ffffff_100%)]">
+      <SiteHeader me={me} />
 
-        <Link
-          to="/dashboard/waypoints/new"
-          className="rounded bg-black px-4 py-2 text-white"
-        >
-          Add waypoint
-        </Link>
-      </div>
+      <main className="page-section">
+        <div className="page-wrap">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-lime-700">
+                Dashboard
+              </p>
+              <h1 className="section-title">Edit waypoints</h1>
+              <p className="mt-2 text-slate-600">
+                Click a route below to change it or delete it.
+              </p>
+            </div>
 
-      {err && <p className="mb-4 text-red-600">{err}</p>}
+            <div className="flex flex-wrap gap-3">
+              <Link to="/dashboard" className="btn-secondary">
+                ← Back to dashboard
+              </Link>
 
-      {!apiKey && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-red-700">
-          Missing VITE_GOOGLE_MAPS_API_KEY in frontend/.env
-        </p>
-      )}
+              <Link to="/dashboard/waypoints/new" className="btn-primary">
+                + Add waypoint
+              </Link>
+            </div>
+          </div>
 
-      <div className="mb-6 h-[500px] overflow-hidden rounded-xl border bg-slate-100">
-        {apiKey && (
-          <APIProvider apiKey={apiKey}>
-            <Map
-              defaultCenter={center}
-              defaultZoom={5}
-              gestureHandling="greedy"
-              disableDefaultUI={false}
-              mapId="blog-journey-map"
-            >
-              {waypoints.map((wp) => {
-                const style = travelStyles[wp.travelMode] || travelStyles.OTHER;
+          {loading && (
+            <div className="card border-lime-100 p-6">
+              Loading waypoints...
+            </div>
+          )}
 
-                const from = {
-                  lat: Number(wp.fromLat),
-                  lng: Number(wp.fromLng),
-                };
+          {!loading && err && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+              {err}
+            </div>
+          )}
 
-                const to = {
-                  lat: Number(wp.toLat),
-                  lng: Number(wp.toLng),
-                };
+          {!loading && !err && waypoints.length === 0 && (
+            <div className="card border-lime-100 p-6">
+              No waypoints have been added yet.
+            </div>
+          )}
 
-                return (
-                  <div key={wp.id}>
-                    <Marker position={from} title={wp.fromName} />
-                    <Marker position={to} title={wp.toName} />
+          {!loading && !err && waypoints.length > 0 && (
+            <section className="grid gap-4">
+              {waypoints.map((wp) => (
+                <Link
+                  key={wp.id}
+                  to={`/dashboard/waypoints/${wp.id}/edit`}
+                  className="rounded-2xl border border-lime-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-lime-300 hover:shadow-md"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-slate-950">
+                        {wp.title || `${wp.fromName} → ${wp.toName}`}
+                      </h2>
 
-                    <Polyline
-                      path={[from, to]}
-                      strokeColor={style.color}
-                      strokeOpacity={0.9}
-                      strokeWeight={4}
-                    />
+                      <p className="mt-2 text-sm text-slate-600">
+                        {wp.fromName} → {wp.toName}
+                      </p>
+
+                      <p className="mt-2 text-sm text-slate-500">
+                        {travelLabels[wp.travelMode] || travelLabels.OTHER}
+                        {wp.travelGroup ? ` · ${wp.travelGroup}` : ""}
+                        {wp.startedAt
+                          ? ` · ${new Date(wp.startedAt).toLocaleDateString()}`
+                          : ""}
+                      </p>
+                    </div>
+
+                    <div className="text-right text-sm">
+                      <span
+                        className={`rounded-full px-3 py-1 ${
+                          wp.bookingStatus === "NOT_BOOKED"
+                            ? "bg-orange-50 text-orange-700"
+                            : "bg-lime-50 text-lime-700"
+                        }`}
+                      >
+                        {wp.bookingStatus === "NOT_BOOKED"
+                          ? "Not booked"
+                          : "Booked"}
+                      </span>
+
+                      <p className="mt-3 text-lime-700">Edit →</p>
+                    </div>
                   </div>
-                );
-              })}
-            </Map>
-          </APIProvider>
-        )}
-      </div>
 
-      {waypoints.length === 0 ? (
-        <div className="rounded border bg-white p-6">No waypoints yet.</div>
-      ) : (
-        <div className="space-y-3">
-          {waypoints.map((wp) => {
-            const style = travelStyles[wp.travelMode] || travelStyles.OTHER;
-
-            return (
-              <div key={wp.id} className="rounded border bg-white p-4">
-                <h2 className="font-semibold">
-                  {style.icon} {wp.title || `${wp.fromName} → ${wp.toName}`}
-                </h2>
-
-                <p className="text-sm text-slate-600">
-                  {wp.fromName} → {wp.toName}
-                </p>
-
-                <p className="text-sm text-slate-600">
-                  {style.label} · {wp.travelGroup}
-                </p>
-              </div>
-            );
-          })}
+                  {wp.notes && (
+                    <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-600">
+                      {wp.notes}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </section>
+          )}
         </div>
-      )}
-    </main>
+      </main>
+    </div>
   );
 }

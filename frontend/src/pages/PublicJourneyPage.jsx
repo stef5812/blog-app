@@ -78,6 +78,7 @@ export default function PublicJourneyPage() {
   const [err, setErr] = useState("");
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const MAP_ID = import.meta.env.VITE_GOOGLE_MAP_ID;
 
   useEffect(() => {
     let ignore = false;

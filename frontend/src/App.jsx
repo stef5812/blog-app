@@ -65,6 +65,8 @@ function App() {
         <Route path="/blog/:username" element={<PublicProfilePage />} />
         <Route path="/blog/:username/post/:slug" element={<PublicPostPage />} />
         <Route path="/dashboard/waypoints" element={<WaypointsPage />} />
+        <Route path="/dashboard/waypoints/new" element={<WaypointCreatePage />} />
+        <Route path="/dashboard/waypoints/:id/edit" element={<WaypointCreatePage />} />
         <Route
   path="/blog/:username/journey"
   element={<PublicJourneyPage />}
