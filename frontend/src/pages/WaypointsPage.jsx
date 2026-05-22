@@ -36,7 +36,7 @@ export default function WaypointsPage() {
         if (ignore) return;
 
         setMe(auth || null);
-        setWaypoints(Array.isArray(data) ? data : []);
+        setWaypoints(Array.isArray(data?.waypoints) ? data.waypoints : []);
       } catch (error) {
         if (!ignore) {
           setErr(error.message || "Could not load waypoints.");
@@ -75,6 +75,13 @@ export default function WaypointsPage() {
               <Link to="/dashboard" className="btn-secondary">
                 ← Back to dashboard
               </Link>
+
+              <Link
+                  to={`/blog/${me?.user?.displayName || "stef5812"}/journey`}
+                  className="btn-secondary"
+                >
+                  View map
+                </Link>
 
               <Link to="/dashboard/waypoints/new" className="btn-primary">
                 + Add waypoint

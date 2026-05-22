@@ -269,7 +269,7 @@ export default function DashboardPage() {
                         View public blog
                       </Link>
 
-                      <Link to="/dashboard/waypoints" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
+                      <Link to="/dashboard/waypoints/new" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
                         Add waypoint
                       </Link>
 
