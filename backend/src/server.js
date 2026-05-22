@@ -63,7 +63,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/public/blogs", subscriptionRoutes);
 app.use("/api/public", publicRoutes);
 
-app.use("/api/me", meRoutes);
 app.use("/api/uploads", uploadRoutes);
 
 app.use("/api/visits", visitsRoutes);
