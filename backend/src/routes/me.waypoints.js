@@ -1,5 +1,3 @@
-// backend/src/routes/me.waypoints.js
-
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
@@ -8,25 +6,26 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+function getAuthUserId(req) {
+  return (
+    req.user?.id ||
+    req.user?.authUserId ||
+    req.authUser?.id ||
+    req.auth?.userId
+  );
+}
+
 router.get("/", async (req, res) => {
   try {
-    const authUserId =
-      req.user?.id ||
-      req.user?.authUserId ||
-      req.authUser?.id ||
-      req.auth?.userId;
+    const authUserId = getAuthUserId(req);
 
     if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    console.log("WAYPOINT authUserId:", authUserId);
-
     const blogProfile = await prisma.blogProfile.findUnique({
       where: { userId: authUserId },
     });
-
-    console.log("WAYPOINT blogProfile:", blogProfile);
 
     if (!blogProfile) {
       return res.status(404).json({ error: "Blog profile not found." });
@@ -34,19 +33,37 @@ router.get("/", async (req, res) => {
 
     const waypoints = await prisma.blogWaypoint.findMany({
       where: { blogProfileId: blogProfile.id },
-      orderBy: { createdAt: "desc" },
+      include: {
+        posts: {
+          include: {
+            post: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ startedAt: "asc" }, { createdAt: "asc" }],
     });
 
     res.json({ waypoints });
   } catch (error) {
-    console.error("Failed to load waypoints:", error);
+    console.error("GET /api/me/waypoints error:", error);
     res.status(500).json({ error: "Failed to load waypoints." });
   }
 });
 
 router.post("/", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const authUserId = getAuthUserId(req);
+
+    if (!authUserId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
 
     const {
       title,
@@ -59,13 +76,14 @@ router.post("/", async (req, res) => {
       travelMode,
       customMode,
       travelGroup,
+      bookingStatus,
       startedAt,
       notes,
       postIds = [],
     } = req.body;
 
     const blogProfile = await prisma.blogProfile.findUnique({
-      where: { userId },
+      where: { userId: authUserId },
     });
 
     if (!blogProfile) {
@@ -98,16 +116,17 @@ router.post("/", async (req, res) => {
         toLat: Number(toLat),
         toLng: Number(toLng),
 
-        travelMode,
+        travelMode: travelMode || "FOOT",
         customMode: travelMode === "OTHER" ? customMode || null : null,
-        travelGroup,
+        travelGroup: travelGroup || "ALONE",
+        bookingStatus: bookingStatus || "BOOKED",
         startedAt: startedAt ? new Date(startedAt) : null,
         notes: notes || null,
 
         posts: {
-          create: postIds.map((postId) => ({
-            postId,
-          })),
+          create: Array.isArray(postIds)
+            ? postIds.map((postId) => ({ postId }))
+            : [],
         },
       },
       include: {
@@ -122,7 +141,7 @@ router.post("/", async (req, res) => {
     res.status(201).json({ waypoint });
   } catch (error) {
     console.error("POST /api/me/waypoints error:", error);
-    res.status(500).json({ error: "Failed to create waypoint." });
+    res.status(500).json({ error: "Failed to save waypoint." });
   }
 });
 
