@@ -1,3 +1,5 @@
+// frontend/src/pages/WaypointCreatePage
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
@@ -92,8 +94,18 @@ export default function WaypointCreatePage() {
           <option value="TRAIN">Train</option>
           <option value="BUS">Bus</option>
           <option value="PLANE">Plane</option>
+          <option value="FERRY">Ferry</option>
           <option value="OTHER">Other</option>
         </select>
+
+        <select
+          className="w-full rounded border p-2"
+          value={form.bookingStatus}
+          onChange={(e) => update("bookingStatus", e.target.value)}
+        >
+          <option value="BOOKED">Booked</option>
+          <option value="NOT_BOOKED">Not booked yet</option>
+        </select>        
 
         {form.travelMode === "OTHER" && (
           <input
