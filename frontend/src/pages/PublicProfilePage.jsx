@@ -136,19 +136,19 @@ export default function PublicProfilePage() {
                       )}
                     </div>
 
-                    <div className="flex shrink-0 flex-col gap-3">
+                    <div className="flex shrink-0 flex-col gap-2 self-start">
                       <Link
                         to={`/blog/${profile.username}/journey`}
-                        className="rounded-xl bg-amber-700 px-5 py-3 text-center font-medium text-white shadow transition hover:bg-amber-800"
+                        className="rounded-lg bg-amber-700 px-4 py-2 text-center text-sm font-medium text-white shadow-sm transition hover:bg-amber-800"
                       >
-                        🗺 Open Journey Map
+                        🗺 Journey Map
                       </Link>
 
                       <Link
                         to={`/blog/${profile.username}`}
-                        className="rounded-xl border border-amber-200 bg-white px-5 py-3 text-center font-medium text-amber-800 transition hover:bg-amber-50"
+                        className="rounded-lg border border-amber-200 bg-white px-4 py-2 text-center text-sm font-medium text-amber-800 transition hover:bg-amber-50"
                       >
-                        ✈ Travel Timeline
+                        ✈ Timeline
                       </Link>
                     </div>
                   </div>

@@ -31,6 +31,7 @@ function VisitTracker() {
     const visitorIdKey = "blog_app_visitor_id";
 
     let visitorId = localStorage.getItem(visitorIdKey);
+
     if (!visitorId) {
       visitorId = crypto.randomUUID();
       localStorage.setItem(visitorIdKey, visitorId);
@@ -61,26 +62,53 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+
         <Route path="/directory" element={<DirectoryPage />} />
-        <Route path="/blog/:username" element={<PublicProfilePage />} />
-        <Route path="/blog/:username/post/:slug" element={<PublicPostPage />} />
-        <Route path="/dashboard/waypoints" element={<WaypointsPage />} />
-        <Route path="/dashboard/waypoints/new" element={<WaypointCreatePage />} />
-        <Route path="/dashboard/waypoints/:id/edit" element={<WaypointCreatePage />} />
+
         <Route
-  path="/blog/:username/journey"
-  element={<PublicJourneyPage />}
-/>
+          path="/blog/:username"
+          element={<PublicProfilePage />}
+        />
+
+        <Route
+          path="/blog/:username/post/:slug"
+          element={<PublicPostPage />}
+        />
 
         <Route
           path="/blog/:username/post/:slug/gallery"
           element={<PostGalleryPage />}
         />
 
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard/settings" element={<SettingsPage />} />
-        <Route path="/dashboard/posts/new" element={<EditPostPage />} />
-        <Route path="/dashboard/posts/:id" element={<EditPostPage />} />
+        <Route
+          path="/blog/:username/post/:slug/map"
+          element={<PublicJourneyPage />}
+        />
+
+        <Route
+          path="/blog/:username/journey"
+          element={<PublicJourneyPage />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={<DashboardPage />}
+        />
+
+        <Route
+          path="/dashboard/settings"
+          element={<SettingsPage />}
+        />
+
+        <Route
+          path="/dashboard/posts/new"
+          element={<EditPostPage />}
+        />
+
+        <Route
+          path="/dashboard/posts/:id"
+          element={<EditPostPage />}
+        />
 
         <Route
           path="/dashboard/posts/:id/gallery"
@@ -92,10 +120,30 @@ function App() {
           element={<WaypointsPage />}
         />
 
-        <Route path="/dashboard/waypoints/new" element={<WaypointCreatePage />} />
+        <Route
+          path="/dashboard/waypoints"
+          element={<WaypointsPage />}
+        />
 
-        <Route path="/dashboard/admin" element={<AdminPage />} />
-        <Route path="/media" element={<MediaLibraryPage />} />
+        <Route
+          path="/dashboard/waypoints/new"
+          element={<WaypointCreatePage />}
+        />
+
+        <Route
+          path="/dashboard/waypoints/:id/edit"
+          element={<WaypointCreatePage />}
+        />
+
+        <Route
+          path="/dashboard/admin"
+          element={<AdminPage />}
+        />
+
+        <Route
+          path="/media"
+          element={<MediaLibraryPage />}
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -57,26 +57,14 @@ function getEnvLinks() {
 function getTheme(pathname) {
   if (pathname.startsWith("/directory")) {
     return {
-      header:
-        "from-amber-900/90 via-amber-700/80 to-orange-600/70",
-      primary: "bg-amber-700 hover:bg-amber-800",
-      border: "border-amber-200",
-      text: "text-amber-700",
-      hoverText: "hover:text-amber-900",
-      hoverBg: "hover:bg-amber-50",
+      header: "from-amber-900/90 via-amber-700/80 to-orange-600/70",
       dropdownHover: "hover:bg-amber-50 hover:text-amber-900",
     };
   }
 
   if (pathname.startsWith("/dashboard/posts/new")) {
     return {
-      header:
-        "from-orange-900/90 via-orange-700/80 to-amber-500/70",
-      primary: "bg-orange-600 hover:bg-orange-700",
-      border: "border-orange-200",
-      text: "text-orange-700",
-      hoverText: "hover:text-orange-900",
-      hoverBg: "hover:bg-orange-50",
+      header: "from-orange-900/90 via-orange-700/80 to-amber-500/70",
       dropdownHover: "hover:bg-orange-50 hover:text-orange-900",
     };
   }
@@ -84,11 +72,6 @@ function getTheme(pathname) {
   if (pathname.startsWith("/dashboard/settings")) {
     return {
       header: "from-red-950/90 via-red-800/80 to-rose-600/70",
-      primary: "bg-red-700 hover:bg-red-800",
-      border: "border-red-200",
-      text: "text-red-700",
-      hoverText: "hover:text-red-900",
-      hoverBg: "hover:bg-red-50",
       dropdownHover: "hover:bg-red-50 hover:text-red-900",
     };
   }
@@ -96,23 +79,61 @@ function getTheme(pathname) {
   if (pathname.startsWith("/dashboard")) {
     return {
       header: "from-sky-950/90 via-sky-800/80 to-cyan-600/70",
-      primary: "bg-sky-600 hover:bg-sky-700",
-      border: "border-sky-200",
-      text: "text-sky-700",
-      hoverText: "hover:text-sky-900",
-      hoverBg: "hover:bg-sky-50",
       dropdownHover: "hover:bg-sky-50 hover:text-sky-900",
+    };
+  }
+
+  if (pathname.startsWith("/blog")) {
+    return {
+      header: "from-amber-950/90 via-stone-800/80 to-orange-700/70",
+      dropdownHover: "hover:bg-amber-50 hover:text-amber-900",
     };
   }
 
   return {
     header: "from-lime-950/90 via-lime-800/80 to-green-600/70",
-    primary: "bg-lime-600 hover:bg-lime-700",
-    border: "border-lime-200",
-    text: "text-lime-700",
-    hoverText: "hover:text-lime-900",
-    hoverBg: "hover:bg-lime-50",
     dropdownHover: "hover:bg-lime-50 hover:text-lime-900",
+  };
+}
+
+function getBlogLinks(pathname) {
+  const postMatch = pathname.match(
+    /^\/blog\/([^/]+)\/post\/([^/]+)(?:\/(gallery|map))?$/
+  );
+
+  const profileMatch = pathname.match(/^\/blog\/([^/]+)$/);
+
+  if (postMatch) {
+    const [, username, slug] = postMatch;
+    const postUrl = `/blog/${username}/post/${slug}`;
+
+    return {
+      hasChosenBlog: true,
+      post: postUrl,
+      list: postUrl,
+      gallery: `${postUrl}/gallery`,
+      map: `${postUrl}/map`,
+    };
+  }
+
+  if (profileMatch) {
+    const [, username] = profileMatch;
+
+    return {
+      hasChosenBlog: true,
+      post: `/blog/${username}`,
+      list: `/blog/${username}`,
+      gallery: null,
+      map: null,
+    };
+  }
+
+  return {
+    hasChosenBlog: false,
+    post: "/directory",
+    list: "/directory",
+    gallery: null,
+    map: null,
   };
 }
 
@@ -123,7 +144,7 @@ function navItem(type, active) {
       active:
         "bg-white/15 text-white shadow-[0_0_18px_rgba(217,249,157,0.95)]",
     },
-    browse: {
+    blog: {
       base: "text-amber-100 hover:bg-white/10 hover:text-white",
       active:
         "bg-white/15 text-white shadow-[0_0_18px_rgba(254,243,199,0.95)]",
@@ -143,6 +164,139 @@ function navItem(type, active) {
   return `rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
     active ? styles[type].active : styles[type].base
   }`;
+}
+
+function BlogDropdown({ currentPath, mobile = false, onChoose }) {
+  const [open, setOpen] = useState(false);
+  const blogLinks = getBlogLinks(currentPath);
+
+  const isBlogActive =
+    currentPath.startsWith("/directory") || currentPath.startsWith("/blog");
+
+  function close() {
+    setOpen(false);
+    if (onChoose) onChoose();
+  }
+
+  if (mobile) {
+    return (
+      <div className="space-y-2">
+        <div
+          className={`${navItem(
+            "blog",
+            isBlogActive
+          )} flex items-center justify-between`}
+        >
+          <Link to={blogLinks.list} onClick={close} className="flex-1">
+            Blog
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            aria-expanded={open}
+            aria-label="Open blog menu"
+            className="ml-2 rounded-lg px-2 py-1 transition hover:bg-white/15"
+          >
+            ▾
+          </button>
+        </div>
+
+        {open && blogLinks.hasChosenBlog && (
+          <div className="ml-8 space-y-2 border-l border-white/20 pl-4">
+            {blogLinks.post && (
+              <Link
+                to={blogLinks.post}
+                onClick={close}
+                className="block rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+              >
+                ↳ Post
+              </Link>
+            )}
+
+            {blogLinks.gallery && (
+              <Link
+                to={blogLinks.gallery}
+                onClick={close}
+                className="block rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+              >
+                ↳ Gallery
+              </Link>
+            )}
+
+            {blogLinks.map && (
+              <Link
+                to={blogLinks.map}
+                onClick={close}
+                className="block rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+              >
+                ↳ Map
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex items-center">
+      <Link
+        to={blogLinks.list}
+        className={`${navItem("blog", isBlogActive)} rounded-r-none pr-3`}
+      >
+        Blog
+      </Link>
+
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label="Open blog menu"
+        className={`${navItem(
+          "blog",
+          isBlogActive
+        )} rounded-l-none border-l border-white/20 px-2`}
+      >
+        ▾
+      </button>
+
+      {open && blogLinks.hasChosenBlog && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/95 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-zinc-200/70 backdrop-blur-md">
+          {blogLinks.post && (
+            <Link
+              to={blogLinks.post}
+              onClick={() => setOpen(false)}
+              className="block px-6 py-3 text-sm font-medium text-zinc-700 transition hover:bg-amber-50 hover:text-amber-900"
+            >
+              ↳ Post
+            </Link>
+          )}
+
+          {blogLinks.gallery && (
+            <Link
+              to={blogLinks.gallery}
+              onClick={() => setOpen(false)}
+              className="block px-6 py-3 text-sm font-medium text-zinc-700 transition hover:bg-amber-50 hover:text-amber-900"
+            >
+              ↳ Gallery
+            </Link>
+          )}
+
+          {blogLinks.map && (
+            <Link
+              to={blogLinks.map}
+              onClick={() => setOpen(false)}
+              className="block px-6 py-3 text-sm font-medium text-zinc-700 transition hover:bg-amber-50 hover:text-amber-900"
+            >
+              ↳ Map
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function LinksDropdown({ theme }) {
@@ -282,15 +436,7 @@ export default function SiteHeader({ me, setMe }) {
               Home
             </Link>
 
-            <Link
-              to="/directory"
-              className={navItem(
-                "browse",
-                currentPath.startsWith("/directory")
-              )}
-            >
-              Browse blogs
-            </Link>
+            <BlogDropdown currentPath={currentPath} />
 
             {isLoggedIn && (
               <>
@@ -366,17 +512,19 @@ export default function SiteHeader({ me, setMe }) {
 
         {open && (
           <div className="space-y-2 pb-4 md:hidden">
-            <Link to="/" onClick={() => setOpen(false)} className={navItem("home", currentPath === "/")}>
+            <Link
+              to="/"
+              onClick={() => setOpen(false)}
+              className={navItem("home", currentPath === "/")}
+            >
               Home
             </Link>
 
-            <Link
-              to="/directory"
-              onClick={() => setOpen(false)}
-              className={navItem("browse", currentPath.startsWith("/directory"))}
-            >
-              Browse blogs
-            </Link>
+            <BlogDropdown
+              currentPath={currentPath}
+              mobile
+              onChoose={() => setOpen(false)}
+            />
 
             {isLoggedIn && (
               <>
