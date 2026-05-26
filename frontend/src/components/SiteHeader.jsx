@@ -1,7 +1,7 @@
 // frontend/src/components/SiteHeader.jsx
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import blogLogo from "../assets/logo-hat.png";
 
 function getEnvLinks() {
@@ -54,7 +54,90 @@ function getEnvLinks() {
   };
 }
 
-function LinksDropdown() {
+function getTheme(pathname) {
+  if (pathname.startsWith("/directory")) {
+    return {
+      primary: "bg-amber-700 hover:bg-amber-800",
+      border: "border-amber-200",
+      text: "text-amber-700",
+      hoverText: "hover:text-amber-900",
+      hoverBg: "hover:bg-amber-50",
+      dropdownHover: "hover:bg-amber-50 hover:text-amber-900",
+    };
+  }
+
+  if (pathname.startsWith("/dashboard/posts/new")) {
+    return {
+      primary: "bg-orange-600 hover:bg-orange-700",
+      border: "border-orange-200",
+      text: "text-orange-700",
+      hoverText: "hover:text-orange-900",
+      hoverBg: "hover:bg-orange-50",
+      dropdownHover: "hover:bg-orange-50 hover:text-orange-900",
+    };
+  }
+
+  if (pathname.startsWith("/dashboard/settings")) {
+    return {
+      primary: "bg-red-700 hover:bg-red-800",
+      border: "border-red-200",
+      text: "text-red-700",
+      hoverText: "hover:text-red-900",
+      hoverBg: "hover:bg-red-50",
+      dropdownHover: "hover:bg-red-50 hover:text-red-900",
+    };
+  }
+
+  if (pathname.startsWith("/dashboard")) {
+    return {
+      primary: "bg-sky-600 hover:bg-sky-700",
+      border: "border-sky-200",
+      text: "text-sky-700",
+      hoverText: "hover:text-sky-900",
+      hoverBg: "hover:bg-sky-50",
+      dropdownHover: "hover:bg-sky-50 hover:text-sky-900",
+    };
+  }
+
+  return {
+    primary: "bg-lime-600 hover:bg-lime-700",
+    border: "border-lime-200",
+    text: "text-lime-700",
+    hoverText: "hover:text-lime-900",
+    hoverBg: "hover:bg-lime-50",
+    dropdownHover: "hover:bg-lime-50 hover:text-lime-900",
+  };
+}
+
+function navItem(type, active) {
+  const styles = {
+    home: {
+      base: "text-lime-700 hover:text-lime-900 hover:bg-lime-50",
+      active: "bg-lime-100 text-lime-900 font-bold",
+    },
+
+    browse: {
+      base: "text-amber-700 hover:text-amber-900 hover:bg-amber-50",
+      active: "bg-amber-100 text-amber-900 font-bold",
+    },
+
+    dashboard: {
+      base: "text-sky-700 hover:text-sky-900 hover:bg-sky-50",
+      active: "bg-sky-100 text-sky-900 font-bold",
+    },
+
+    settings: {
+      base: "text-red-700 hover:text-red-900 hover:bg-red-50",
+      active: "bg-red-100 text-red-900 font-bold",
+    },
+  };
+
+  return `rounded-xl px-4 py-2 text-sm transition ${
+    active ? styles[type].active : styles[type].base
+  }`;
+}
+
+function LinksDropdown({ theme }) {
   const [open, setOpen] = useState(false);
   const { apps, users } = getEnvLinks();
 
@@ -65,7 +148,7 @@ function LinksDropdown() {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="btn-primary bg-lime-600 hover:bg-lime-700"
+        className={`btn-primary ${theme.primary}`}
       >
         Links <span className="ml-1">▾</span>
       </button>
@@ -82,7 +165,7 @@ function LinksDropdown() {
             <a
               key={item.label}
               href={item.href}
-              className="block px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-green-50 hover:text-green-700"
+              className={`block px-4 py-3 text-sm font-medium text-zinc-700 transition ${theme.dropdownHover}`}
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -101,7 +184,7 @@ function LinksDropdown() {
             <a
               key={item.label}
               href={item.href}
-              className="block px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-green-50 hover:text-green-700"
+              className={`block px-4 py-3 text-sm font-medium text-zinc-700 transition ${theme.dropdownHover}`}
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -115,8 +198,13 @@ function LinksDropdown() {
 
 export default function SiteHeader({ me, setMe }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  const currentPath = location.pathname;
+  const theme = getTheme(currentPath);
 
   const isLoggedIn = !!me?.user;
 
@@ -130,8 +218,12 @@ export default function SiteHeader({ me, setMe }) {
   const prodNext = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
 
   const loginHref = import.meta.env.DEV
-    ? `http://localhost:5173/login?from=blog-app&next=${encodeURIComponent(devNext)}`
-    : `https://auth.stefandodds.ie/login?from=blog-app&next=${encodeURIComponent(prodNext)}`;
+    ? `http://localhost:5173/login?from=blog-app&next=${encodeURIComponent(
+        devNext
+      )}`
+    : `https://auth.stefandodds.ie/login?from=blog-app&next=${encodeURIComponent(
+        prodNext
+      )}`;
 
   const { apps, users } = getEnvLinks();
 
@@ -158,7 +250,9 @@ export default function SiteHeader({ me, setMe }) {
       <div className="page-wrap">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="h-10 w-10 overflow-hidden rounded-2xl border border-lime-200 bg-white">
+            <div
+              className={`h-10 w-10 overflow-hidden rounded-2xl border ${theme.border} bg-white`}
+            >
               <img
                 src={blogLogo}
                 alt="Blog Platform logo"
@@ -170,6 +264,7 @@ export default function SiteHeader({ me, setMe }) {
               <p className="text-sm font-semibold text-slate-900">
                 Blog Platform
               </p>
+
               <p className="text-xs text-slate-500">
                 Public blogs, private authoring
               </p>
@@ -177,30 +272,51 @@ export default function SiteHeader({ me, setMe }) {
           </Link>
 
           <nav className="hidden items-center gap-2 md:flex">
-            <Link to="/" className="btn-ghost">
+            <Link
+              to="/"
+              className={navItem(
+                "home",
+                currentPath === "/"
+              )}
+            >
               Home
             </Link>
 
             <Link
               to="/directory"
-              className="text-sm font-medium text-slate-700 hover:text-lime-700"
+              className={navItem(
+                "browse",
+                currentPath.startsWith("/directory")
+              )}
             >
               Browse blogs
             </Link>
 
             {isLoggedIn && (
               <>
-                <Link to="/dashboard" className="btn-ghost">
+                <Link
+                  to="/dashboard"
+                  className={navItem(
+                    "dashboard",
+                    currentPath === "/dashboard"
+                  )}
+                >
                   Dashboard
                 </Link>
 
-                <Link to="/dashboard/settings" className="btn-ghost">
+                <Link
+                  to="/dashboard/settings"
+                  className={navItem(
+                    "settings",
+                    currentPath.startsWith("/dashboard/settings")
+                  )}
+                >
                   Settings
                 </Link>
 
                 <Link
                   to="/dashboard/posts/new"
-                  className="btn-primary bg-lime-600 hover:bg-lime-700"
+                  className={`btn-primary ${theme.primary}`}
                 >
                   New post
                 </Link>
@@ -208,7 +324,7 @@ export default function SiteHeader({ me, setMe }) {
                 {isAdmin && (
                   <Link
                     to="/dashboard/admin"
-                    className="btn-secondary border-red-200 text-red-700 hover:bg-red-50"
+                    className="btn-secondary border-red-200 text-red-700 hover:bg-red-50 hover:text-red-900"
                   >
                     Admin
                   </Link>
@@ -216,21 +332,21 @@ export default function SiteHeader({ me, setMe }) {
               </>
             )}
 
-            <LinksDropdown />
+            <LinksDropdown theme={theme} />
 
             {isLoggedIn ? (
               <button
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50 disabled:opacity-60"
+                className={`btn-secondary ${theme.border} ${theme.text} ${theme.hoverBg} ${theme.hoverText} disabled:opacity-60`}
               >
                 {loggingOut ? "Logging out..." : "Logout"}
               </button>
             ) : (
               <a
                 href={loginHref}
-                className="btn-primary bg-lime-600 hover:bg-lime-700"
+                className={`btn-primary ${theme.primary}`}
               >
                 Login
               </a>
@@ -242,119 +358,11 @@ export default function SiteHeader({ me, setMe }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-300 bg-white text-slate-700 md:hidden"
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${theme.border} bg-white ${theme.text} transition ${theme.hoverBg} ${theme.hoverText} md:hidden`}
           >
             {open ? "✕" : "☰"}
           </button>
         </div>
-
-        {open && (
-          <div className="border-t border-slate-200 py-3 md:hidden">
-            <div className="flex flex-col gap-2">
-              <Link to="/" onClick={() => setOpen(false)} className="btn-ghost">
-                Home
-              </Link>
-
-              <Link
-                to="/directory"
-                onClick={() => setOpen(false)}
-                className="btn-ghost"
-              >
-                Directory
-              </Link>
-
-              <div className="mt-2 px-1">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                  Other apps
-                </p>
-                <div className="flex flex-col gap-2">
-                  {apps.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="btn-ghost text-left"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-2 px-1">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                  Users
-                </p>
-                <div className="flex flex-col gap-2">
-                  {users.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="btn-ghost text-left"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {isLoggedIn ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="btn-ghost"
-                  >
-                    Dashboard
-                  </Link>
-
-                  <Link
-                    to="/dashboard/settings"
-                    onClick={() => setOpen(false)}
-                    className="btn-ghost"
-                  >
-                    Settings
-                  </Link>
-
-                  <Link
-                    to="/dashboard/posts/new"
-                    onClick={() => setOpen(false)}
-                    className="btn-primary bg-lime-600 hover:bg-lime-700"
-                  >
-                    New post
-                  </Link>
-
-                  {isAdmin && (
-                    <Link
-                      to="/dashboard/admin"
-                      onClick={() => setOpen(false)}
-                      className="btn-secondary border-red-200 text-red-700"
-                    >
-                      Admin
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="btn-secondary"
-                  >
-                    {loggingOut ? "Logging out..." : "Logout"}
-                  </button>
-                </>
-              ) : (
-                <a
-                  href={loginHref}
-                  onClick={() => setOpen(false)}
-                  className="btn-primary bg-lime-600 hover:bg-lime-700"
-                >
-                  Login
-                </a>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );

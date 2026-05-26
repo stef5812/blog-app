@@ -45,9 +45,7 @@ export default function DashboardPage() {
           return;
         }
 
-        if (!ignore) {
-          setMe(auth);
-        }
+        if (!ignore) setMe(auth);
 
         const profileData = await apiFetch("/me/profile").catch(() => null);
 
@@ -57,13 +55,10 @@ export default function DashboardPage() {
         }
 
         if (!profileData) {
-          if (!ignore) {
-            setPosts([]);
-          }
+          if (!ignore) setPosts([]);
           return;
         }
 
-        // const postsData = await apiFetch("/me/posts").catch(() => []);
         const postsData = await apiFetch("/me/posts");
 
         if (!ignore) {
@@ -74,9 +69,7 @@ export default function DashboardPage() {
           setErr(error.message || "Could not load your dashboard.");
         }
       } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+        if (!ignore) setLoading(false);
       }
     }
 
@@ -114,7 +107,6 @@ export default function DashboardPage() {
 
     try {
       const uploaded = await apiUpload("/uploads/image", file);
-
       setAvatarUrl(uploaded.url);
       setAvatarMsg("Photo uploaded. Save settings to keep it.");
     } catch (error) {
@@ -142,7 +134,7 @@ export default function DashboardPage() {
           avatarUrl,
           siteTitle: profile.siteTitle || "",
           siteDescription: profile.siteDescription || "",
-          themeAccent: profile.themeAccent || "#65a30d",
+          themeAccent: profile.themeAccent || "#0284c7",
         }),
       });
 
@@ -157,25 +149,31 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_28%,#ffffff_100%)]">
+    <div className="app-shell bg-[linear-gradient(180deg,#eff6ff_0%,#f8fafc_42%,#ffffff_100%)]">
       <SiteHeader me={me} />
 
-      <main className="page-section">
-        <div className="page-wrap">
-          <div className="card border-lime-100 p-6 sm:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <main className="py-3 sm:py-4">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-sky-100 bg-white/90 p-4 shadow-sm sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-medium text-lime-700">Dashboard</p>
-                <h1 className="section-title">Your blog workspace</h1>
-                <p className="mt-2 text-slate-600">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-700">
+                  Dashboard
+                </p>
+
+                <h1 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                  Your blog workspace
+                </h1>
+
+                <p className="mt-1 text-sm text-stone-600">
                   Manage your blog profile and posts.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2">
                 <Link
                   to="/dashboard/settings"
-                  className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                  className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
                 >
                   Settings
                 </Link>
@@ -183,7 +181,7 @@ export default function DashboardPage() {
                 {profile && (
                   <Link
                     to="/dashboard/posts/new"
-                    className="btn-primary bg-lime-600 hover:bg-lime-700"
+                    className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
                   >
                     New post
                   </Link>
@@ -193,31 +191,33 @@ export default function DashboardPage() {
           </div>
 
           {loading && (
-            <div className="mt-6 card border-lime-100 p-6">
-              <p className="text-slate-600">Loading dashboard...</p>
+            <div className="mt-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+              <p className="text-stone-600">Loading dashboard...</p>
             </div>
           )}
 
           {!loading && err && (
-            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+            <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-700">
               {err}
             </div>
           )}
 
           {!loading && !err && !profile && (
-            <div className="mt-6 card border-lime-100 p-6 sm:p-8">
-              <h2 className="text-xl font-semibold text-slate-950">
+            <div className="mt-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-xl font-semibold text-stone-950">
                 Create your blog
               </h2>
-              <p className="mt-3 max-w-2xl text-slate-600">
-                You are logged in, but you have not created your blog profile yet.
-                Go to Settings, choose your username and blog details, then save.
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
+                You are logged in, but you have not created your blog profile
+                yet. Go to Settings, choose your username and blog details,
+                then save.
               </p>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <Link
                   to="/dashboard/settings"
-                  className="btn-primary bg-lime-600 hover:bg-lime-700"
+                  className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
                 >
                   Open settings
                 </Link>
@@ -227,67 +227,80 @@ export default function DashboardPage() {
 
           {!loading && !err && profile && (
             <>
-              <div className="mt-6 card border-lime-100 p-6 sm:p-8">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="mt-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex-1">
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                      <div className="h-20 w-20 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="h-16 w-16 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
                         {profile.avatarUrl ? (
                           <img
                             src={profile.avatarUrl}
-                            alt={profile.displayName || profile.siteTitle || "Profile"}
+                            alt={
+                              profile.displayName ||
+                              profile.siteTitle ||
+                              "Profile"
+                            }
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                          <div className="flex h-full w-full items-center justify-center text-xs text-stone-400">
                             No photo
                           </div>
                         )}
                       </div>
 
                       <div>
-                        <h2 className="text-xl font-semibold text-slate-950">
-                          {profile.siteTitle || profile.displayName || "Your blog"}
+                        <h2 className="text-xl font-semibold text-stone-950">
+                          {profile.siteTitle ||
+                            profile.displayName ||
+                            "Your blog"}
                         </h2>
 
-                        <p className="mt-2 text-slate-600">
-                          {profile.username ? `@${profile.username}` : ""}
+                        <p className="mt-1 text-sm text-stone-600">
+                          {profile.username
+                            ? `@${profile.username}`
+                            : ""}
                         </p>
 
                         {profile.siteDescription && (
-                          <p className="mt-4 text-slate-600">
+                          <p className="mt-2 text-sm leading-6 text-stone-600">
                             {profile.siteDescription}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <Link
                         to={`/blog/${profile.username}`}
-                        className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                        className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
                       >
                         View public blog
                       </Link>
 
-                      <Link to="/dashboard/waypoints/new" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
+                      <Link
+                        to="/dashboard/waypoints/new"
+                        className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
+                      >
                         Add waypoint
                       </Link>
 
-                      <Link to="/dashboard/waypoints" className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50">
+                      <Link
+                        to="/dashboard/waypoints"
+                        className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
+                      >
                         Edit waypoints
                       </Link>
                     </div>
                   </div>
 
-                  <div className="w-full max-w-md rounded-2xl border border-lime-100 bg-white p-5">
-                    <h3 className="text-lg font-semibold text-slate-950">
+                  <div className="w-full max-w-sm rounded-2xl border border-sky-100 bg-sky-50/40 p-4">
+                    <h3 className="text-base font-semibold text-stone-950">
                       Profile photo
                     </h3>
 
-
-                    <div className="mt-4 flex justify-center">
-                      <div className="h-28 w-28 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                    <div className="mt-3 flex justify-center">
+                      <div className="h-24 w-24 overflow-hidden rounded-2xl border border-stone-200 bg-white">
                         {avatarUrl ? (
                           <img
                             src={avatarUrl}
@@ -295,50 +308,51 @@ export default function DashboardPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                          <div className="flex h-full w-full items-center justify-center text-xs text-stone-400">
                             No image
                           </div>
                         )}
                       </div>
                     </div>
-
-
-
-
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 card border-lime-100 p-6 sm:p-8">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-slate-950">Your posts</h2>
-                  <span className="rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-lime-800">
+              <div className="mt-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-semibold text-stone-950">
+                    Your posts
+                  </h2>
+
+                  <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-800">
                     {posts.length} post{posts.length === 1 ? "" : "s"}
                   </span>
                 </div>
 
                 {posts.length === 0 ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-lime-200 p-6 text-slate-600">
+                  <div className="mt-4 rounded-xl border border-dashed border-sky-200 p-4 text-sm text-stone-600">
                     You have no posts yet.
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-4">
+                  <div className="mt-4 space-y-3">
                     {posts.map((post) => (
                       <div
                         key={post.id}
-                        className="rounded-2xl border border-slate-200 bg-white p-5"
+                        className="rounded-xl border border-stone-200 bg-white p-4"
                       >
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <h3 className="text-lg font-semibold text-slate-950">
+                            <h3 className="text-base font-semibold text-stone-950">
                               {post.title || "Untitled post"}
                             </h3>
-                            <p className="mt-1 text-sm text-slate-500">
+
+                            <p className="mt-1 text-sm text-stone-500">
                               {post.slug
                                 ? `/blog/${profile.username}/post/${post.slug}`
                                 : "No slug"}
                             </p>
-                            <p className="mt-2 text-sm text-slate-500">
+
+                            <p className="mt-1 text-xs text-stone-500">
                               Updated{" "}
                               {post.updatedAt
                                 ? new Date(post.updatedAt).toLocaleString()
@@ -349,7 +363,7 @@ export default function DashboardPage() {
                           <div className="flex flex-wrap gap-2">
                             <Link
                               to={`/dashboard/posts/${post.id}`}
-                              className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                              className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
                             >
                               Edit
                             </Link>
@@ -357,7 +371,7 @@ export default function DashboardPage() {
                             {post.slug && (
                               <Link
                                 to={`/blog/${profile.username}/post/${post.slug}`}
-                                className="btn-ghost"
+                                className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-stone-600 transition hover:bg-stone-100 hover:text-stone-950"
                               >
                                 View
                               </Link>

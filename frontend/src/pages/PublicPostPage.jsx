@@ -1,4 +1,4 @@
-// frontend/src/pages/PublicPostPage.jsx 
+// frontend/src/pages/PublicPostPage.jsx
 
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ function renderMarks(text, marks = []) {
       return (
         <code
           key={index}
-          className="rounded-lg bg-slate-100 px-1.5 py-0.5 text-[0.95em] text-sky-800"
+          className="rounded-lg bg-amber-100 px-1.5 py-0.5 text-[0.95em] text-[#7a4b2a]"
         >
           {acc}
         </code>
@@ -30,7 +30,7 @@ function renderMarks(text, marks = []) {
           href={mark.attrs?.href}
           target="_blank"
           rel="noreferrer"
-          className="font-medium text-sky-700 underline underline-offset-4"
+          className="font-medium text-[#7a4b2a] underline underline-offset-4"
         >
           {acc}
         </a>
@@ -56,7 +56,7 @@ function renderMarks(text, marks = []) {
         <mark
           key={index}
           className="rounded px-1"
-          style={{ backgroundColor: mark.attrs?.color || "#fef08a" }}
+          style={{ backgroundColor: mark.attrs?.color || "#fde68a" }}
         >
           {acc}
         </mark>
@@ -82,7 +82,7 @@ function renderNode(node, key) {
       return (
         <p
           key={key}
-          className="text-base leading-8 text-slate-700 sm:text-lg"
+          className="text-base leading-8 text-stone-700 sm:text-lg"
           style={{ textAlign: node.attrs?.textAlign || undefined }}
         >
           {node.content?.map((child, index) => renderNode(child, index))}
@@ -94,13 +94,16 @@ function renderNode(node, key) {
 
     case "heading": {
       const level = node.attrs?.level || 2;
+
       const classMap = {
-        1: "text-4xl font-semibold tracking-tight text-slate-950",
-        2: "text-3xl font-semibold tracking-tight text-slate-950",
-        3: "text-2xl font-semibold tracking-tight text-slate-950",
-        4: "text-xl font-semibold tracking-tight text-slate-950",
+        1: "text-4xl font-semibold tracking-tight text-stone-950",
+        2: "text-3xl font-semibold tracking-tight text-stone-950",
+        3: "text-2xl font-semibold tracking-tight text-stone-950",
+        4: "text-xl font-semibold tracking-tight text-stone-950",
       };
+
       const Tag = `h${level}`;
+
       return (
         <Tag
           key={key}
@@ -114,14 +117,14 @@ function renderNode(node, key) {
 
     case "bulletList":
       return (
-        <ul key={key} className="list-disc space-y-2 pl-6 text-slate-700">
+        <ul key={key} className="list-disc space-y-2 pl-6 text-stone-700">
           {node.content?.map((child, index) => renderNode(child, index))}
         </ul>
       );
 
     case "orderedList":
       return (
-        <ol key={key} className="list-decimal space-y-2 pl-6 text-slate-700">
+        <ol key={key} className="list-decimal space-y-2 pl-6 text-stone-700">
           {node.content?.map((child, index) => renderNode(child, index))}
         </ol>
       );
@@ -137,7 +140,7 @@ function renderNode(node, key) {
       return (
         <blockquote
           key={key}
-          className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-5 text-lg italic leading-8 text-slate-700"
+          className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-5 text-lg italic leading-8 text-stone-700"
           style={{ textAlign: node.attrs?.textAlign || undefined }}
         >
           {node.content?.map((child, index) => renderNode(child, index))}
@@ -145,7 +148,7 @@ function renderNode(node, key) {
       );
 
     case "horizontalRule":
-      return <hr key={key} className="border-slate-200" />;
+      return <hr key={key} className="border-amber-200" />;
 
     case "image":
       if (!node.attrs?.src) return null;
@@ -155,10 +158,11 @@ function renderNode(node, key) {
           <img
             src={node.attrs.src}
             alt={node.attrs.alt || ""}
-            className="w-full rounded-2xl border border-slate-200"
+            className="w-full rounded-2xl border border-amber-200"
           />
+
           {node.attrs.title && (
-            <figcaption className="mt-2 text-sm text-slate-500">
+            <figcaption className="mt-2 text-sm text-stone-500">
               {node.attrs.title}
             </figcaption>
           )}
@@ -224,15 +228,16 @@ export default function PublicPostPage() {
 
   if (loading) {
     return (
-      <div className="app-shell">
+      <div className="app-shell bg-[linear-gradient(180deg,#f8f1ea_0%,#f5efe8_42%,#ffffff_100%)]">
         <SiteHeader me={me} />
+
         <main className="page-section">
           <div className="page-wrap max-w-4xl">
             <div className="animate-pulse space-y-6">
-              <div className="h-5 w-40 rounded-xl bg-slate-200" />
-              <div className="h-12 w-3/4 rounded-xl bg-slate-200" />
-              <div className="h-6 w-2/3 rounded-xl bg-slate-200" />
-              <div className="h-72 rounded-3xl bg-slate-200" />
+              <div className="h-5 w-40 rounded-xl bg-amber-100" />
+              <div className="h-12 w-3/4 rounded-xl bg-amber-100" />
+              <div className="h-6 w-2/3 rounded-xl bg-amber-100" />
+              <div className="h-72 rounded-3xl bg-amber-100" />
             </div>
           </div>
         </main>
@@ -242,15 +247,17 @@ export default function PublicPostPage() {
 
   if (err || !data?.post) {
     return (
-      <div className="app-shell">
+      <div className="app-shell bg-[linear-gradient(180deg,#f8f1ea_0%,#f5efe8_42%,#ffffff_100%)]">
         <SiteHeader me={me} />
+
         <main className="page-section">
           <div className="page-wrap max-w-3xl">
-            <div className="card p-6 sm:p-8">
-              <h1 className="text-2xl font-semibold text-slate-950">
+            <div className="rounded-3xl border border-amber-100 bg-white p-6 shadow-sm sm:p-8">
+              <h1 className="text-2xl font-semibold text-stone-950">
                 Post not found
               </h1>
-              <p className="mt-3 text-slate-600">
+
+              <p className="mt-3 text-stone-600">
                 {err || "This post does not exist."}
               </p>
             </div>
@@ -261,82 +268,91 @@ export default function PublicPostPage() {
   }
 
   const { profile, post } = data;
-  const accent = profile?.themeAccent || "#0f172a";
+
+  const accent = profile?.themeAccent || "#7a4b2a";
 
   return (
-    <div className="app-shell">
+    <div className="app-shell bg-[linear-gradient(180deg,#f8f1ea_0%,#f5efe8_42%,#ffffff_100%)]">
       <SiteHeader me={me} />
 
       <main className="page-section">
         <div className="page-wrap max-w-4xl">
-          <div className="mb-6">
-            <Link to={`/blog/${cleanUsername}`} className="btn-secondary">
-              ← Back to @{cleanUsername}
-            </Link>
-          </div>
 
-          <article className="card overflow-hidden">
-          {post.coverImageUrl ? (
-            post.coverMediaType === "video" ? (
-              <video
-                src={post.coverImageUrl}
-                className="h-56 w-full border-b border-slate-200 object-cover sm:h-72"
-                poster={post.coverThumbnailUrl || undefined}
-                muted
-                playsInline
-                autoPlay
-                loop
-                controls
-                preload="metadata"
-              />
+
+          <article className="overflow-hidden rounded-3xl border border-amber-100 bg-white shadow-sm">
+            {post.coverImageUrl ? (
+              post.coverMediaType === "video" ? (
+                <video
+                  src={post.coverImageUrl}
+                  className="h-56 w-full border-b border-amber-100 object-cover sm:h-72"
+                  poster={post.coverThumbnailUrl || undefined}
+                  muted
+                  playsInline
+                  autoPlay
+                  loop
+                  controls
+                  preload="metadata"
+                />
+              ) : (
+                <img
+                  src={post.coverImageUrl}
+                  alt={post.title || "Cover image"}
+                  className="h-56 w-full border-b border-amber-100 object-cover sm:h-72"
+                />
+              )
             ) : (
-              <img
-                src={post.coverImageUrl}
-                alt={post.title || "Cover image"}
-                className="h-56 w-full border-b border-slate-200 object-cover sm:h-72"
+              <div
+                className="h-56 w-full border-b border-amber-100 sm:h-72"
+                style={{
+                  background: `linear-gradient(135deg, ${accent}22, #f5e7d8 75%)`,
+                }}
               />
-            )
-          ) : (
-            <div
-              className="h-56 w-full border-b border-slate-200 sm:h-72"
-              style={{
-                background: `linear-gradient(135deg, ${accent}22, #e2e8f0 75%)`,
-              }}
-            />
-          )}
+            )}
 
-            <div className="p-6 sm:p-8 lg:p-10">
+            <div className="p-4 sm:p-5 lg:p-6">
               <header>
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+                <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#7a4b2a]">
                   {profile?.siteTitle || `@${cleanUsername}`}
                 </p>
 
-                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
                   {post.title}
                 </h1>
 
                 {post.excerpt && (
-                  <p className="mt-5 text-lg leading-8 text-slate-600 sm:text-xl">
+                  <p className="mt-5 text-lg leading-8 text-stone-600 sm:text-xl">
                     {post.excerpt}
                   </p>
                 )}
 
-                <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-stone-500">
                   <span className="font-medium">@{cleanUsername}</span>
                   <span>•</span>
+
                   <span>
                     {post.publishedAt
                       ? new Date(post.publishedAt).toLocaleDateString()
                       : "Draft"}
                   </span>
                 </div>
+
                 <div className="mt-6">
                   <Link
                     to={`/blog/${cleanUsername}/post/${slug}/gallery`}
-                    className="btn-secondary"
+                    className="inline-flex items-center justify-center rounded-xl bg-[#7a4b2a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#633b21]"
                   >
                     Open Gallery
                   </Link>
+
+
+                  <div className="mt-3">
+                    <Link
+                      to={`/blog/${cleanUsername}`}
+                      className="inline-flex items-center text-xs font-medium text-stone-500 transition hover:text-stone-900"
+                    >
+                      ← Back to @{cleanUsername}
+                    </Link>
+                  </div>
                 </div>
               </header>
 

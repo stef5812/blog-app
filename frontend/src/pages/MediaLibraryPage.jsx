@@ -1,3 +1,5 @@
+// frontend/src/pages/MediaLibraryPage.jsx
+
 import { useEffect, useState } from "react";
 
 const API_BASE = import.meta.env.DEV ? "/api" : "/blog-app/api";
