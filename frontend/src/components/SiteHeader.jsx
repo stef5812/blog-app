@@ -57,6 +57,8 @@ function getEnvLinks() {
 function getTheme(pathname) {
   if (pathname.startsWith("/directory")) {
     return {
+      header:
+        "from-amber-900/90 via-amber-700/80 to-orange-600/70",
       primary: "bg-amber-700 hover:bg-amber-800",
       border: "border-amber-200",
       text: "text-amber-700",
@@ -68,6 +70,8 @@ function getTheme(pathname) {
 
   if (pathname.startsWith("/dashboard/posts/new")) {
     return {
+      header:
+        "from-orange-900/90 via-orange-700/80 to-amber-500/70",
       primary: "bg-orange-600 hover:bg-orange-700",
       border: "border-orange-200",
       text: "text-orange-700",
@@ -79,6 +83,7 @@ function getTheme(pathname) {
 
   if (pathname.startsWith("/dashboard/settings")) {
     return {
+      header: "from-red-950/90 via-red-800/80 to-rose-600/70",
       primary: "bg-red-700 hover:bg-red-800",
       border: "border-red-200",
       text: "text-red-700",
@@ -90,6 +95,7 @@ function getTheme(pathname) {
 
   if (pathname.startsWith("/dashboard")) {
     return {
+      header: "from-sky-950/90 via-sky-800/80 to-cyan-600/70",
       primary: "bg-sky-600 hover:bg-sky-700",
       border: "border-sky-200",
       text: "text-sky-700",
@@ -100,6 +106,7 @@ function getTheme(pathname) {
   }
 
   return {
+    header: "from-lime-950/90 via-lime-800/80 to-green-600/70",
     primary: "bg-lime-600 hover:bg-lime-700",
     border: "border-lime-200",
     text: "text-lime-700",
@@ -112,27 +119,28 @@ function getTheme(pathname) {
 function navItem(type, active) {
   const styles = {
     home: {
-      base: "text-lime-700 hover:text-lime-900 hover:bg-lime-50",
-      active: "bg-lime-100 text-lime-900 font-bold",
+      base: "text-lime-100 hover:bg-white/10 hover:text-white",
+      active:
+        "bg-white/15 text-white shadow-[0_0_18px_rgba(217,249,157,0.95)]",
     },
-
     browse: {
-      base: "text-amber-700 hover:text-amber-900 hover:bg-amber-50",
-      active: "bg-amber-100 text-amber-900 font-bold",
+      base: "text-amber-100 hover:bg-white/10 hover:text-white",
+      active:
+        "bg-white/15 text-white shadow-[0_0_18px_rgba(254,243,199,0.95)]",
     },
-
     dashboard: {
-      base: "text-sky-700 hover:text-sky-900 hover:bg-sky-50",
-      active: "bg-sky-100 text-sky-900 font-bold",
+      base: "text-sky-100 hover:bg-white/10 hover:text-white",
+      active:
+        "bg-white/15 text-white shadow-[0_0_18px_rgba(186,230,253,0.95)]",
     },
-
     settings: {
-      base: "text-red-700 hover:text-red-900 hover:bg-red-50",
-      active: "bg-red-100 text-red-900 font-bold",
+      base: "text-red-100 hover:bg-white/10 hover:text-white",
+      active:
+        "bg-white/15 text-white shadow-[0_0_18px_rgba(254,202,202,0.95)]",
     },
   };
 
-  return `rounded-xl px-4 py-2 text-sm transition ${
+  return `rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
     active ? styles[type].active : styles[type].base
   }`;
 }
@@ -148,7 +156,7 @@ function LinksDropdown({ theme }) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="true"
-        className={`btn-primary ${theme.primary}`}
+        className="rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-white/20 transition hover:bg-white/25"
       >
         Links <span className="ml-1">▾</span>
       </button>
@@ -225,8 +233,6 @@ export default function SiteHeader({ me, setMe }) {
         prodNext
       )}`;
 
-  const { apps, users } = getEnvLinks();
-
   async function handleLogout() {
     setLoggingOut(true);
 
@@ -246,13 +252,13 @@ export default function SiteHeader({ me, setMe }) {
   }
 
   return (
-    <header className="topbar">
+    <header
+      className={`sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r ${theme.header} shadow-lg shadow-black/10 backdrop-blur-xl transition-all duration-700`}
+    >
       <div className="page-wrap">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div
-              className={`h-10 w-10 overflow-hidden rounded-2xl border ${theme.border} bg-white`}
-            >
+            <div className="h-10 w-10 overflow-hidden rounded-2xl border border-white/30 bg-white/90 shadow-sm">
               <img
                 src={blogLogo}
                 alt="Blog Platform logo"
@@ -261,24 +267,18 @@ export default function SiteHeader({ me, setMe }) {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-slate-900">
+              <p className="text-sm font-semibold text-white drop-shadow">
                 Blog Platform
               </p>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-white/75">
                 Public blogs, private authoring
               </p>
             </div>
           </Link>
 
           <nav className="hidden items-center gap-2 md:flex">
-            <Link
-              to="/"
-              className={navItem(
-                "home",
-                currentPath === "/"
-              )}
-            >
+            <Link to="/" className={navItem("home", currentPath === "/")}>
               Home
             </Link>
 
@@ -316,7 +316,7 @@ export default function SiteHeader({ me, setMe }) {
 
                 <Link
                   to="/dashboard/posts/new"
-                  className={`btn-primary ${theme.primary}`}
+                  className="rounded-xl bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-white"
                 >
                   New post
                 </Link>
@@ -324,7 +324,7 @@ export default function SiteHeader({ me, setMe }) {
                 {isAdmin && (
                   <Link
                     to="/dashboard/admin"
-                    className="btn-secondary border-red-200 text-red-700 hover:bg-red-50 hover:text-red-900"
+                    className="rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
                   >
                     Admin
                   </Link>
@@ -339,14 +339,14 @@ export default function SiteHeader({ me, setMe }) {
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className={`btn-secondary ${theme.border} ${theme.text} ${theme.hoverBg} ${theme.hoverText} disabled:opacity-60`}
+                className="rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-60"
               >
                 {loggingOut ? "Logging out..." : "Logout"}
               </button>
             ) : (
               <a
                 href={loginHref}
-                className={`btn-primary ${theme.primary}`}
+                className="rounded-xl bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-white"
               >
                 Login
               </a>
@@ -358,11 +358,50 @@ export default function SiteHeader({ me, setMe }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${theme.border} bg-white ${theme.text} transition ${theme.hoverBg} ${theme.hoverText} md:hidden`}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/30 bg-white/10 text-white transition hover:bg-white/20 md:hidden"
           >
             {open ? "✕" : "☰"}
           </button>
         </div>
+
+        {open && (
+          <div className="space-y-2 pb-4 md:hidden">
+            <Link to="/" onClick={() => setOpen(false)} className={navItem("home", currentPath === "/")}>
+              Home
+            </Link>
+
+            <Link
+              to="/directory"
+              onClick={() => setOpen(false)}
+              className={navItem("browse", currentPath.startsWith("/directory"))}
+            >
+              Browse blogs
+            </Link>
+
+            {isLoggedIn && (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className={navItem("dashboard", currentPath === "/dashboard")}
+                >
+                  Dashboard
+                </Link>
+
+                <Link
+                  to="/dashboard/settings"
+                  onClick={() => setOpen(false)}
+                  className={navItem(
+                    "settings",
+                    currentPath.startsWith("/dashboard/settings")
+                  )}
+                >
+                  Settings
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
