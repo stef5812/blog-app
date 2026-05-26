@@ -38,7 +38,21 @@ export default function PostGalleryPage() {
 
         if (!ignore) {
           setPost(data.post || null);
-          setItems(data.items || []);
+        
+          const sortedItems = [...(data.items || [])].sort((a, b) => {
+            const dateA = new Date(
+              a.takenAt || a.createdAt || a.uploadedAt || 0
+            ).getTime();
+        
+            const dateB = new Date(
+              b.takenAt || b.createdAt || b.uploadedAt || 0
+            ).getTime();
+        
+            return dateA - dateB;
+          });
+        
+          setItems(sortedItems);
+        
           setActiveIndex(0);
         }
       } catch (error) {
