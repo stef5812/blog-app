@@ -66,6 +66,64 @@ router.get("/blogs", async (req, res) => {
   }
 });
 
+router.get("/comments", async (req, res) => {
+  try {
+    const comments = await prisma.comment.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            blogProfile: {
+              select: {
+                username: true,
+                userId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return res.json(comments);
+  } catch (err) {
+    console.error("GET /api/admin/comments failed:", err);
+    return res.status(500).json({ error: "Failed to load comments" });
+  }
+});
+
+router.delete("/comments/:commentId", async (req, res) => {
+  try {
+    const { commentId } = req.params;
+
+    const existing = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: {
+        id: true,
+        content: true,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    await prisma.comment.delete({
+      where: { id: commentId },
+    });
+
+    return res.json({
+      ok: true,
+      deletedCommentId: commentId,
+    });
+  } catch (err) {
+    console.error("DELETE /api/admin/comments/:commentId failed:", err);
+    return res.status(500).json({ error: "Failed to delete comment" });
+  }
+});
+
 router.delete("/posts/:id", async (req, res) => {
   try {
     const { id } = req.params;
