@@ -273,79 +273,25 @@ export default function PublicJourneyPage() {
       No journey routes have been added yet.
     </div>
   ) : (
-    waypoints.map((wp) => {
-      const style =
-        travelStyles[wp.travelMode] || travelStyles.OTHER;
+    [...waypoints]
+      .sort(
+        (a, b) =>
+          new Date(b.startedAt || 0) -
+          new Date(a.startedAt || 0)
+      )
+      .map((wp) => {
+        const style =
+          travelStyles[wp.travelMode] || travelStyles.OTHER;
 
-      const isFuture =
-        wp.startedAt && new Date(wp.startedAt) > new Date();
-
-      const isNotBooked =
-        wp.bookingStatus === "NOT_BOOKED";
-
-      return (
-        <article
-          key={wp.id}
-          className="rounded-2xl border border-lime-100 bg-white p-5 shadow-sm"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-950">
-                {style.icon}{" "}
-                {wp.title || `${wp.fromName} → ${wp.toName}`}
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-600">
-                {wp.fromName} → {wp.toName}
-              </p>
-            </div>
-
-            <span
-              className="rounded-full px-3 py-1 text-xs font-semibold text-white"
-              style={{ backgroundColor: style.color }}
-            >
-              {style.label}
-            </span>
-          </div>
-
-          {wp.description && (
-            <p className="mt-3 text-sm leading-relaxed text-slate-700">
-              {wp.description}
-            </p>
-          )}
-
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            {wp.startedAt && (
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                Start:{" "}
-                {new Date(wp.startedAt).toLocaleDateString()}
-              </span>
-            )}
-
-            {wp.endedAt && (
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                End:{" "}
-                {new Date(wp.endedAt).toLocaleDateString()}
-              </span>
-            )}
-
-            {isFuture && (
-              <span
-                className={`rounded-full px-3 py-1 ${
-                  isNotBooked
-                    ? "bg-amber-100 text-amber-800"
-                    : "bg-cyan-100 text-cyan-800"
-                }`}
-              >
-                {isNotBooked
-                  ? "Future - not booked"
-                  : "Future - booked"}
-              </span>
-            )}
-          </div>
-        </article>
-      );
-    })
+        return (
+          <article
+            key={wp.id}
+            className="rounded-2xl border border-lime-100 bg-white p-5 shadow-sm"
+          >
+            {/* card content */}
+          </article>
+        );
+      })
   )}
 </section>
   </>

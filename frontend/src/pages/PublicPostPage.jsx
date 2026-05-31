@@ -183,6 +183,12 @@ export default function PublicPostPage() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [comments, setComments] = useState([]);
+  const [commentName, setCommentName] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [commentErr, setCommentErr] = useState("");
+  const [savingComment, setSavingComment] = useState(false);
+
   useEffect(() => {
     let ignore = false;
 
@@ -226,6 +232,27 @@ export default function PublicPostPage() {
     };
   }, [cleanUsername, slug]);
 
+  useEffect(() => {
+    let ignore = false;
+  
+    async function loadComments() {
+      if (!data?.post?.id) return;
+  
+      try {
+        const result = await apiFetch(`/public/posts/${data.post.id}/comments`);
+        if (!ignore) setComments(result);
+      } catch {
+        if (!ignore) setComments([]);
+      }
+    }
+  
+    loadComments();
+  
+    return () => {
+      ignore = true;
+    };
+  }, [data?.post?.id]);
+
   if (loading) {
     return (
       <div className="app-shell bg-[linear-gradient(180deg,#f8f1ea_0%,#f5efe8_42%,#ffffff_100%)]">
@@ -268,6 +295,32 @@ export default function PublicPostPage() {
   }
 
   const { profile, post } = data;
+
+  async function submitComment(e) {
+    e.preventDefault();
+  
+    try {
+      setSavingComment(true);
+      setCommentErr("");
+  
+      const saved = await apiFetch(`/public/posts/${post.id}/comments`, {
+        method: "POST",
+        body: JSON.stringify({
+          authorName: commentName,
+          content: commentText,
+        }),
+      });
+  
+      setComments((current) => [saved, ...current]);
+      setCommentText("");
+    } catch {
+      setCommentErr("Could not save comment.");
+    } finally {
+      setSavingComment(false);
+    }
+  }
+
+
 
   const accent = profile?.themeAccent || "#7a4b2a";
 
@@ -345,6 +398,7 @@ export default function PublicPostPage() {
                   </Link>
 
 
+
                   <div className="mt-3">
                     <Link
                       to={`/blog/${cleanUsername}`}
@@ -359,8 +413,65 @@ export default function PublicPostPage() {
               <div className="mt-10">
                 {renderNode(post.contentJson, "root")}
               </div>
+
+
+              
             </div>
           </article>
+
+{/* Comments */}
+<div className="mt-12 border-t border-amber-100 pt-8">
+  <h2 className="text-2xl font-semibold text-stone-950">Comments</h2>
+
+  {comments.length === 0 ? (
+    <p className="mt-2 text-stone-500">Be the first to comment.</p>
+  ) : (
+    <div className="mt-5 space-y-4">
+      {comments.map((comment) => (
+        <div
+          key={comment.id}
+          className="rounded-2xl border border-amber-100 bg-white p-4"
+        >
+          <div className="text-sm font-semibold text-stone-900">
+            {comment.authorName}
+          </div>
+          <p className="mt-2 whitespace-pre-wrap text-stone-700">
+            {comment.content}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <form onSubmit={submitComment} className="mt-6 space-y-3">
+    <input
+      value={commentName}
+      onChange={(e) => setCommentName(e.target.value)}
+      placeholder="Your name"
+      className="w-full rounded-xl border border-amber-200 p-3"
+    />
+
+    <textarea
+      value={commentText}
+      onChange={(e) => setCommentText(e.target.value)}
+      placeholder="Write a comment..."
+      className="w-full rounded-xl border border-amber-200 p-3"
+    />
+
+    {commentErr && (
+      <p className="text-sm text-red-600">{commentErr}</p>
+    )}
+
+    <button
+      type="submit"
+      disabled={savingComment}
+      className="rounded-xl bg-[#7a4b2a] px-4 py-2 font-semibold text-white disabled:opacity-60"
+    >
+      {savingComment ? "Posting..." : "Post Comment"}
+    </button>
+  </form>
+</div>
+
         </div>
       </main>
     </div>
