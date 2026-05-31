@@ -110,7 +110,9 @@
           blogProfileId: profile.id,
           status: "PUBLISHED",
         },
-        orderBy: { publishedAt: "desc" },
+        orderBy: {
+          publishedAt: "desc",
+        },
         select: {
           id: true,
           title: true,
@@ -120,10 +122,28 @@
           coverMediaType: true,
           coverThumbnailUrl: true,
           publishedAt: true,
+      
+          _count: {
+            select: {
+              comments: true,
+            },
+          },
         },
       });
 
-      res.json(posts);
+      res.json(
+        posts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          coverImageUrl: post.coverImageUrl,
+          coverMediaType: post.coverMediaType,
+          coverThumbnailUrl: post.coverThumbnailUrl,
+          publishedAt: post.publishedAt,
+          commentCount: post._count?.comments || 0,
+        }))
+      );
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Failed to load posts" });

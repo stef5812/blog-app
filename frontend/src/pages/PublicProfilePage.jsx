@@ -163,6 +163,11 @@ export default function PublicProfilePage() {
                     </div>
 
                     <div className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm">
+                      💬 {posts.reduce((total, post) => total + (post.commentCount || 0), 0)} comment
+                      {posts.reduce((total, post) => total + (post.commentCount || 0), 0) === 1 ? "" : "s"}
+                    </div>
+
+                    <div className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm">
                       🚆 Journey Routes
                     </div>
                   </div>
@@ -277,6 +282,10 @@ export default function PublicProfilePage() {
                                     ).toLocaleDateString()
                                   : ""}
                               </p>
+
+                              <span>
+                                💬 {post.commentCount || 0} comment{(post.commentCount || 0) === 1 ? "" : "s"}
+                              </span>
 
                               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                                 <Link
