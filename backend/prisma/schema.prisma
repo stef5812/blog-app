@@ -96,6 +96,7 @@ model Post {
 
   blogProfile BlogProfile @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
   mediaItems  MediaItem[]
+  comments    Comment[]
 
   @@unique([blogProfileId, slug])
   @@index([userId])
@@ -139,11 +140,11 @@ model BlogWaypoint {
   toLat  Float
   toLng  Float
 
-  travelMode  TravelMode
-  customMode  String?
+  travelMode    TravelMode
+  customMode    String?
   bookingStatus BookingStatus @default(BOOKED)
-  travelGroup TravelGroup
-  startedAt   DateTime?
+  travelGroup   TravelGroup
+  startedAt     DateTime?
 
   notes String?
 
@@ -152,6 +153,20 @@ model BlogWaypoint {
 
   blogProfile BlogProfile        @relation(fields: [blogProfileId], references: [id], onDelete: Cascade)
   posts       BlogWaypointPost[]
+}
+
+model Comment {
+  id String @id @default(cuid())
+
+  postId String
+  userId String?
+
+  authorName String
+  content    String
+
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model BlogWaypointPost {
