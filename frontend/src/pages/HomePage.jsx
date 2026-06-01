@@ -4,16 +4,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { authMe } from "../lib/api";
 import SiteHeader from "../components/SiteHeader";
-import TravelAvatar from "../components/TravelAvatar";
-import logoImg from "../assets/stefandodds-logo-ai.png";
-import avatarsImg from "../assets/travel-avatars.png";
-
-const highlights = [
-  "Public blogs with no signup required for readers",
-  "Private writer dashboard using standalone-auth",
-  "Mobile-friendly writing and management experience",
-  "Travel-themed branding with reusable avatars",
-];
 
 const AUTH_BASE = (
   import.meta.env.VITE_AUTH_BASE || "http://localhost:5173"
@@ -24,32 +14,137 @@ const APP_BASE_URL = (
   (typeof window !== "undefined" ? window.location.origin : "")
 ).replace(/\/+$/, "");
 
+const APP_BASE = import.meta.env.DEV ? "" : "/blog-app";
+
 function getAuthRegisterUrl() {
   const next = encodeURIComponent(`${APP_BASE_URL}/dashboard/settings`);
   return `${AUTH_BASE}/register?from=blog-app&next=${next}`;
 }
 
+function resolveUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/")) return `${APP_BASE}${url}`;
+  return `${APP_BASE}/${url}`;
+}
+
+function getBlogUrl(blog) {
+  const username = blog?.username || blog?.user?.username || blog?.slug;
+  return username ? `/blog/${username}` : "/directory";
+}
+
+function normaliseBlogs(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.blogs)) return data.blogs;
+  if (Array.isArray(data?.profiles)) return data.profiles;
+  if (Array.isArray(data?.items)) return data.items;
+  return [];
+}
+
+const tools = [
+  {
+    title: "Bird Sound Identifier",
+    icon: "🐦",
+    text: "Record bird calls and identify likely species.",
+    href: "https://stefandodds.ie/wildlife-sound/?mode=bird",
+    status: "Open",
+    available: true,
+  },
+  {
+    title: "Wildlife Sound Identifier",
+    icon: "🦉",
+    text: "Analyse animal sounds, frogs, insects and other wildlife recordings.",
+    href: "https://stefandodds.ie/wildlife-sound/?mode=animal",
+    status: "Open",
+    available: true,
+  },
+  {
+    title: "Plant Photo Identifier",
+    icon: "🌿",
+    text: "Upload a plant photo and identify likely species.",
+    href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=PLANT",
+    status: "Open",
+    available: true,
+  },
+  {
+    title: "Mushroom Identifier",
+    icon: "🍄",
+    text: "Photograph fungi and identify likely species.",
+    href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=FUNGI",
+    status: "Coming soon",
+    available: false,
+  },
+  {
+    title: "Wildlife Photo Identifier",
+    icon: "🐾",
+    text: "Identify mammals, insects, reptiles and amphibians from images.",
+    href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=ANIMAL",
+    status: "Coming soon",
+    available: false,
+  },
+];
+
 export default function HomePage() {
   const [me, setMe] = useState(null);
+  const [blogs, setBlogs] = useState([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
 
   useEffect(() => {
     let ignore = false;
 
-    async function load() {
-      try {
-        const auth = await authMe().catch(() => null);
+    async function loadAuth() {
+      const auth = await authMe().catch(() => null);
+      if (!ignore) setMe(auth || null);
+    }
 
-        if (!ignore) {
-          setMe(auth || null);
+    loadAuth();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadBlogs() {
+      setBlogsLoading(true);
+
+      const endpoints = [
+        `${APP_BASE}/api/directory`,
+        `${APP_BASE}/api/blogs`,
+        `${APP_BASE}/api/public/blogs`,
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const res = await fetch(endpoint, {
+            credentials: "include",
+          });
+
+          if (!res.ok) continue;
+
+          const data = await res.json();
+          const found = normaliseBlogs(data).slice(0, 6);
+
+          if (!ignore) {
+            setBlogs(found);
+            setBlogsLoading(false);
+          }
+
+          return;
+        } catch {
+          // try next endpoint
         }
-      } catch {
-        if (!ignore) {
-          setMe(null);
-        }
+      }
+
+      if (!ignore) {
+        setBlogs([]);
+        setBlogsLoading(false);
       }
     }
 
-    load();
+    loadBlogs();
 
     return () => {
       ignore = true;
@@ -60,133 +155,236 @@ export default function HomePage() {
   const setupHref = isLoggedIn ? "/dashboard/settings" : getAuthRegisterUrl();
 
   return (
-    <div className="app-shell bg-[linear-gradient(180deg,#f7fff7_0%,#f8fafc_35%,#ffffff_100%)]">
+    <div className="app-shell bg-[#FAF7F2] text-slate-900">
       <SiteHeader me={me} setMe={setMe} />
 
       <main>
-        <section className="page-section overflow-hidden">
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(45,55,72,0.86),rgba(53,94,59,0.72)),url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80')] bg-cover bg-center" />
+
+          <div className="page-wrap relative py-24 sm:py-28 lg:py-36">
+            <div className="max-w-3xl">
+              <p className="mb-5 inline-flex rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-medium text-white shadow-sm backdrop-blur">
+                Travel stories, maps, photos and journeys
+              </p>
+
+              <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                Share your journey with the world.
+              </h1>
+
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/90 sm:text-xl">
+                Create a travel blog for your adventures, photography, videos,
+                route maps and stories from anywhere.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/directory"
+                  className="rounded-full bg-[#B85C38] px-6 py-3 text-center font-semibold text-white shadow-lg transition hover:bg-[#9f4e31]"
+                >
+                  Explore travel blogs
+                </Link>
+
+                {isLoggedIn ? (
+                  <Link
+                    to="/dashboard"
+                    className="rounded-full border border-white/35 bg-white/15 px-6 py-3 text-center font-semibold text-white backdrop-blur transition hover:bg-white/25"
+                  >
+                    Open dashboard
+                  </Link>
+                ) : (
+                  <a
+                    href={setupHref}
+                    className="rounded-full border border-white/35 bg-white/15 px-6 py-3 text-center font-semibold text-white backdrop-blur transition hover:bg-white/25"
+                  >
+                    Create your blog
+                  </a>
+                )}
+              </div>
+
+              <p className="mt-5 text-sm text-white/75">
+                Free public reading • Mobile friendly • Built for travel
+                storytelling
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="page-section">
           <div className="page-wrap">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-lime-200 bg-lime-50 px-3 py-1 text-sm font-medium text-lime-800">
-                  <span className="inline-block h-2 w-2 rounded-full bg-lime-500" />
-                  Travel blogs powered by AI-ready auth
-                </div>
-
-                <img
-                  src={logoImg}
-                  alt="Stefandodds.ie Full Stack AI"
-                  className="mb-6 h-auto w-full max-w-[340px] sm:max-w-[430px]"
-                />
-
-                <h1 className="hero-title max-w-3xl">
-                  Build travel-inspired blogs that look professional on desktop
-                  and mobile.
-                </h1>
-
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                  Give every writer their own public blog space, with private
-                  editing through standalone-auth. Readers can browse freely,
-                  while authors manage their profile, posts, and branding from a
-                  polished dashboard.
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#B85C38]">
+                  Featured journeys
                 </p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  {isLoggedIn && (
+                <h2 className="mt-3 text-4xl font-bold text-slate-950">
+                  Travel blogs from the community
+                </h2>
+
+                <p className="mt-3 max-w-2xl text-lg text-slate-600">
+                  Browse real journeys, personal travel writing, photo stories
+                  and adventure blogs.
+                </p>
+              </div>
+
+              <Link
+                to="/directory"
+                className="font-semibold text-[#B85C38] hover:text-[#9f4e31]"
+              >
+                View all blogs →
+              </Link>
+            </div>
+
+            {blogsLoading ? (
+              <div className="grid gap-6 md:grid-cols-3">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="h-80 animate-pulse rounded-[2rem] bg-white shadow-sm"
+                  />
+                ))}
+              </div>
+            ) : blogs.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {blogs.map((blog) => {
+                  const title =
+                    blog.blogTitle ||
+                    blog.title ||
+                    blog.displayName ||
+                    blog.name ||
+                    blog.username ||
+                    "Travel Blog";
+
+                  const description =
+                    blog.bio ||
+                    blog.description ||
+                    blog.excerpt ||
+                    "A personal travel journal with stories, photos and journeys.";
+
+                  const image =
+                    blog.coverImageUrl ||
+                    blog.avatarUrl ||
+                    blog.imageUrl ||
+                    blog.coverUrl;
+
+                  return (
                     <Link
-                      to="/dashboard"
-                      className="btn-primary bg-lime-600 hover:bg-lime-700"
+                      key={blog.id || title}
+                      to={getBlogUrl(blog)}
+                      className="group overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl"
                     >
-                      Open dashboard
+                      <div className="h-52 overflow-hidden bg-slate-200">
+                        {image ? (
+                          <img
+                            src={resolveUrl(image)}
+                            alt={title}
+                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#D8C3A5,#355E3B)] text-6xl">
+                            🌍
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-6">
+                        <p className="text-sm font-semibold text-[#B85C38]">
+                          Travel journal
+                        </p>
+
+                        <h3 className="mt-2 text-2xl font-bold text-slate-950">
+                          {title}
+                        </h3>
+
+                        <p className="mt-3 line-clamp-3 text-slate-600">
+                          {description}
+                        </p>
+
+                        <p className="mt-5 font-semibold text-[#355E3B]">
+                          Open journey →
+                        </p>
+                      </div>
                     </Link>
-                  )}
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-[2rem] border border-dashed border-[#D8C3A5] bg-white p-10 text-center">
+                <h3 className="text-2xl font-bold text-slate-950">
+                  No public travel blogs found yet.
+                </h3>
 
-                  <Link
-                    to="/directory"
-                    className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
-                  >
-                    Browse blogs
-                  </Link>
+                <p className="mt-3 text-slate-600">
+                  Once public blogs are available, they will appear here
+                  automatically.
+                </p>
 
+                <div className="mt-6">
                   {isLoggedIn ? (
                     <Link
                       to="/dashboard/settings"
-                      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                      className="rounded-full bg-[#B85C38] px-6 py-3 font-semibold text-white hover:bg-[#9f4e31]"
                     >
                       Set up my blog
                     </Link>
                   ) : (
                     <a
                       href={setupHref}
-                      className="btn-secondary border-lime-200 text-lime-800 hover:bg-lime-50"
+                      className="rounded-full bg-[#B85C38] px-6 py-3 font-semibold text-white hover:bg-[#9f4e31]"
                     >
-                      Set up my blog
+                      Create your blog
                     </a>
                   )}
                 </div>
+              </div>
+            )}
+          </div>
+        </section>
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  {[0, 1, 2, 3, 4].map((index) => (
-                    <TravelAvatar
-                      key={index}
-                      src={avatarsImg}
-                      index={index}
-                      size={52}
-                    />
-                  ))}
-                  <div className="rounded-full border border-lime-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
-                    International travel theme
-                  </div>
-                </div>
+        <section className="page-section pt-0">
+          <div className="page-wrap">
+            <div className="rounded-[2.5rem] bg-[#355E3B] p-8 text-white shadow-xl sm:p-10 lg:p-12">
+              <div className="mb-8 max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D8C3A5]">
+                  Travel & nature tools
+                </p>
 
-                {me?.user && (
-                  <div className="mt-6 card max-w-xl border-lime-100 p-4">
-                    <p className="text-sm text-slate-500">Signed in as</p>
-                    <p className="mt-1 font-medium text-slate-900">
-                      {me.user.displayName || me.user.email}
-                    </p>
-                  </div>
-                )}
+                <h2 className="mt-3 text-4xl font-bold">
+                  Identify what you discover on the journey
+                </h2>
+
+                <p className="mt-4 text-lg leading-8 text-white/80">
+                  Use AI-powered tools for birds, wildlife sounds, plants and
+                  future photo identification features.
+                </p>
               </div>
 
-              <div className="relative">
-                <div className="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-lime-200/40 blur-3xl" />
-                <div className="absolute -bottom-10 -left-8 h-48 w-48 rounded-full bg-emerald-200/40 blur-3xl" />
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {tools.map((tool) => (
+                  <a
+                    key={tool.title}
+                    href={tool.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`rounded-[2rem] border border-white/10 bg-white/10 p-6 backdrop-blur transition hover:-translate-y-1 hover:bg-white/15 ${
+                      !tool.available ? "opacity-75" : ""
+                    }`}
+                  >
+                    <div className="text-5xl">{tool.icon}</div>
 
-                <div className="card relative overflow-hidden border-lime-100 p-4 sm:p-6">
-                  <div className="mb-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        Featured travel writers
-                      </p>
-                      <h2 className="text-2xl font-semibold text-slate-950">
-                        Global voices
-                      </h2>
-                    </div>
-                    <div className="rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-lime-800">
-                      Live
-                    </div>
-                  </div>
+                    <h3 className="mt-5 text-xl font-bold text-white">
+                      {tool.title}
+                    </h3>
 
-                  <div className="overflow-hidden rounded-3xl border border-lime-100 bg-white">
-                    <img
-                      src={avatarsImg}
-                      alt="Travel themed avatar collection"
-                      className="h-auto w-full object-cover"
-                    />
-                  </div>
+                    <p className="mt-3 text-white/75">{tool.text}</p>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    {highlights.map((item) => (
-                      <div
-                        key={item}
-                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
-                      >
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                    <p className="mt-5 font-semibold text-[#D8C3A5]">
+                      {tool.status}
+                      {tool.available ? " →" : ""}
+                    </p>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -194,221 +392,86 @@ export default function HomePage() {
 
         <section className="page-section pt-0">
           <div className="page-wrap">
-            <div className="mb-6 text-center">
-              <h2 className="text-4xl font-bold text-lime-800">
-                Nature Tools
-              </h2>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-slate-200">
+                <div className="text-4xl">🗺️</div>
 
-              <p className="mt-3 text-lg text-slate-600">
-                AI-powered tools for identifying birds, wildlife, plants and fungi.
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-              {/* Bird Sound */}
-              <a
-                href="https://stefandodds.ie/wildlife-sound/"
-                className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="text-5xl">🐦</div>
-
-                <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                  Bird Sound
+                <h3 className="mt-5 text-2xl font-bold text-slate-950">
+                  Interactive maps
                 </h3>
 
-                <p className="mt-2 text-slate-600">
-                  Record bird calls and identify species using BirdNET AI.
+                <p className="mt-3 text-slate-600">
+                  Turn routes and places into visual travel stories.
                 </p>
-
-                <div className="mt-4 font-medium text-lime-700">
-                  Open App →
-                </div>
-              </a>
-
-              {/* Wildlife Sound */}
-              <a
-                href="https://stefandodds.ie/wildlife-sound/"
-                className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="text-5xl">🎵</div>
-
-                <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                  Wildlife Sound
-                </h3>
-
-                <p className="mt-2 text-slate-600">
-                  Analyse animal sounds, frogs, insects and other wildlife recordings.
-                </p>
-
-                <div className="mt-4 font-medium text-lime-700">
-                  Open App →
-                </div>
-              </a>
-
-              {/* Mushroom ID */}
-              <div className="card border-slate-200 p-6 opacity-80">
-                <div className="text-5xl">🍄</div>
-
-                <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                  Mushroom ID
-                </h3>
-
-                <p className="mt-2 text-slate-600">
-                  Photograph fungi and identify likely species.
-                </p>
-
-                <div className="mt-4 text-sm font-medium text-slate-500">
-                  Coming Soon
-                </div>
               </div>
 
-              {/* Flora ID */}
-              <div className="card border-slate-200 p-6 opacity-80">
-                <div className="text-5xl">🌿</div>
+              <div className="rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-slate-200">
+                <div className="text-4xl">📸</div>
 
-                <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                  Flora ID
+                <h3 className="mt-5 text-2xl font-bold text-slate-950">
+                  Rich media
                 </h3>
 
-                <p className="mt-2 text-slate-600">
-                  Identify flowers, trees and plants from photographs.
+                <p className="mt-3 text-slate-600">
+                  Share photos, videos, galleries and written reflections.
                 </p>
-
-                <div className="mt-4 text-sm font-medium text-slate-500">
-                  Coming Soon
-                </div>
               </div>
 
-              {/* Fauna ID */}
-              <div className="card border-slate-200 p-6 opacity-80">
-                <div className="text-5xl">🐾</div>
+              <div className="rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-slate-200">
+                <div className="text-4xl">✍️</div>
 
-                <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                  Fauna ID
+                <h3 className="mt-5 text-2xl font-bold text-slate-950">
+                  Your own space
                 </h3>
 
-                <p className="mt-2 text-slate-600">
-                  Identify mammals, insects, reptiles and amphibians from images.
+                <p className="mt-3 text-slate-600">
+                  Publish under your own profile and build a personal travel
+                  journal.
                 </p>
-
-                <div className="mt-4 text-sm font-medium text-slate-500">
-                  Coming Soon
-                </div>
               </div>
             </div>
           </div>
         </section>
 
         <section className="page-section pt-0">
-  <div className="page-wrap">
-    <div className="mb-6 text-center">
-      <h2 className="text-4xl font-bold text-lime-800">
-        Nature Tools
-      </h2>
+          <div className="page-wrap">
+            <div className="overflow-hidden rounded-[2.5rem] bg-[linear-gradient(135deg,#B85C38,#355E3B)] p-10 text-center text-white shadow-xl sm:p-14">
+              <h2 className="text-4xl font-bold">
+                Ready to start your travel story?
+              </h2>
 
-      <p className="mt-3 text-lg text-slate-600">
-        AI-powered tools for identifying birds, wildlife, plants and fungi.
-      </p>
-    </div>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-white/85">
+                Create a blog, publish your journeys and share your adventures
+                with readers anywhere.
+              </p>
 
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-      <a
-        href="https://stefandodds.ie/wildlife-sound/?mode=bird"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
-      >
-        <div className="text-5xl">🐦</div>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                {isLoggedIn ? (
+                  <Link
+                    to="/dashboard"
+                    className="rounded-full bg-white px-6 py-3 font-semibold text-[#355E3B] transition hover:bg-[#FAF7F2]"
+                  >
+                    Open dashboard
+                  </Link>
+                ) : (
+                  <a
+                    href={setupHref}
+                    className="rounded-full bg-white px-6 py-3 font-semibold text-[#355E3B] transition hover:bg-[#FAF7F2]"
+                  >
+                    Create my blog
+                  </a>
+                )}
 
-        <h3 className="mt-4 text-xl font-semibold text-slate-900">
-          Bird Sound
-        </h3>
-
-        <p className="mt-2 text-slate-600">
-          Record bird calls and identify species using BirdNET AI.
-        </p>
-
-        <div className="mt-4 font-medium text-lime-700">
-          Open Bird Analyser →
-        </div>
-      </a>
-
-      <a
-        href="https://stefandodds.ie/wildlife-sound/?mode=animal"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
-      >
-        <div className="text-5xl">🎵</div>
-
-        <h3 className="mt-4 text-xl font-semibold text-slate-900">
-          Wildlife Sound
-        </h3>
-
-        <p className="mt-2 text-slate-600">
-          Analyse animal sounds, frogs, insects and other wildlife recordings.
-        </p>
-
-        <div className="mt-4 font-medium text-lime-700">
-          Open Wildlife Analyser →
-        </div>
-      </a>
-
-      <a
-        href="https://stefandodds.ie/wildlife-sound/?mode=photo&type=PLANT"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
-      >
-        <div className="text-5xl">🌿</div>
-
-        <h3 className="mt-4 text-xl font-semibold text-slate-900">
-          Plant Photo
-        </h3>
-
-        <p className="mt-2 text-slate-600">
-          Upload a plant photo and identify likely species using AI.
-        </p>
-
-        <div className="mt-4 font-medium text-lime-700">
-          Open Plant Analyser →
-        </div>
-      </a>
-
-      <div className="card border-slate-200 p-6 opacity-80">
-        <div className="text-5xl">🍄</div>
-
-        <h3 className="mt-4 text-xl font-semibold text-slate-900">
-          Mushroom ID
-        </h3>
-
-        <p className="mt-2 text-slate-600">
-          Photograph fungi and identify likely species.
-        </p>
-
-        <div className="mt-4 text-sm font-medium text-slate-500">
-          Coming Soon
-        </div>
-      </div>
-
-      <div className="card border-slate-200 p-6 opacity-80">
-        <div className="text-5xl">🐾</div>
-
-        <h3 className="mt-4 text-xl font-semibold text-slate-900">
-          Fauna Photo
-        </h3>
-
-        <p className="mt-2 text-slate-600">
-          Identify mammals, insects, reptiles and amphibians from images.
-        </p>
-
-        <div className="mt-4 text-sm font-medium text-slate-500">
-          Coming Soon
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+                <Link
+                  to="/directory"
+                  className="rounded-full border border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+                >
+                  Browse journeys
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
