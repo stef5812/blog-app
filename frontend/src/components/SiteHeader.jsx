@@ -17,6 +17,7 @@ function getEnvLinks() {
         { label: "HalfYourBook", href: "http://localhost:5175/halfyourbook/" },
         { label: "Portfolio", href: "http://localhost:5177/" },
         { label: "Service Locator", href: "http://localhost:5178/" },
+        { label: "Wildlife", href: "http://localhost:5179/" },
       ],
       users: [
         {
@@ -184,9 +185,9 @@ function BlogDropdown({ currentPath, mobile = false, onChoose }) {
             isBlogActive
           )} flex items-center justify-between`}
         >
-          <Link to={blogLinks.list} onClick={close} className="flex-1">
-            Blog
-          </Link>
+        <Link to="/directory" onClick={close} className="flex-1">
+          Blog
+        </Link>
 
           <button
             type="button"
@@ -239,7 +240,8 @@ function BlogDropdown({ currentPath, mobile = false, onChoose }) {
   return (
     <div className="relative flex items-center">
       <Link
-        to={blogLinks.list}
+        to="/directory"
+        onClick={() => setOpen(false)}
         className={`${navItem("blog", isBlogActive)} rounded-r-none pr-3`}
       >
         Blog
