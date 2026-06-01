@@ -38,6 +38,7 @@ function getEnvLinks() {
       { label: "HalfYourBook", href: "https://stefandodds.ie/halfyourbook/" },
       { label: "Portfolio", href: "https://stefandodds.ie/" },
       { label: "Service Locator", href: "https://stefandodds.ie/service-locator/" },
+      { label: "Wildlife", href: "https://stefandodds.ie/wildlife-sound/" },
     ],
     users: [
       {
