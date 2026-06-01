@@ -71,7 +71,7 @@ const tools = [
     icon: "🍄",
     text: "Photograph fungi and identify likely species.",
     href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=FUNGI",
-    status: "Coming soon",
+    status: "Open",
     available: false,
   },
   {
@@ -79,8 +79,8 @@ const tools = [
     icon: "🐾",
     text: "Identify mammals, insects, reptiles and amphibians from images.",
     href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=ANIMAL",
-    status: "Coming soon",
-    available: false,
+    status: "Open",
+    available: true,
   },
 ];
 
