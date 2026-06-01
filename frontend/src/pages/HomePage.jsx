@@ -72,7 +72,7 @@ const tools = [
     text: "Photograph fungi and identify likely species.",
     href: "https://stefandodds.ie/wildlife-sound/?mode=photo&type=FUNGI",
     status: "Open",
-    available: false,
+    available: true,
   },
   {
     title: "Wildlife Photo Identifier",
