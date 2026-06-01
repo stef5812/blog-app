@@ -300,40 +300,115 @@ export default function HomePage() {
         </section>
 
         <section className="page-section pt-0">
-          <div className="page-wrap">
-            <div className="grid gap-5 md:grid-cols-3">
-              <div className="card border-lime-100 p-6">
-                <p className="text-sm text-slate-500">Public reading</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">
-                  No login
-                </p>
-                <p className="mt-3 text-slate-600">
-                  Anyone can browse profiles and posts without joining.
-                </p>
-              </div>
+  <div className="page-wrap">
+    <div className="mb-6 text-center">
+      <h2 className="text-4xl font-bold text-lime-800">
+        Nature Tools
+      </h2>
 
-              <div className="card border-lime-100 p-6">
-                <p className="text-sm text-slate-500">Author identity</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">
-                  @username
-                </p>
-                <p className="mt-3 text-slate-600">
-                  Each writer gets their own public blog space and theme.
-                </p>
-              </div>
+      <p className="mt-3 text-lg text-slate-600">
+        AI-powered tools for identifying birds, wildlife, plants and fungi.
+      </p>
+    </div>
 
-              <div className="card border-lime-100 p-6">
-                <p className="text-sm text-slate-500">Content format</p>
-                <p className="mt-2 text-3xl font-semibold text-slate-950">
-                  JSON editor
-                </p>
-                <p className="mt-3 text-slate-600">
-                  Structured content for cleaner rendering and future features.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+      <a
+        href="https://stefandodds.ie/wildlife-sound/?mode=bird"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
+      >
+        <div className="text-5xl">🐦</div>
+
+        <h3 className="mt-4 text-xl font-semibold text-slate-900">
+          Bird Sound
+        </h3>
+
+        <p className="mt-2 text-slate-600">
+          Record bird calls and identify species using BirdNET AI.
+        </p>
+
+        <div className="mt-4 font-medium text-lime-700">
+          Open Bird Analyser →
+        </div>
+      </a>
+
+      <a
+        href="https://stefandodds.ie/wildlife-sound/?mode=animal"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
+      >
+        <div className="text-5xl">🎵</div>
+
+        <h3 className="mt-4 text-xl font-semibold text-slate-900">
+          Wildlife Sound
+        </h3>
+
+        <p className="mt-2 text-slate-600">
+          Analyse animal sounds, frogs, insects and other wildlife recordings.
+        </p>
+
+        <div className="mt-4 font-medium text-lime-700">
+          Open Wildlife Analyser →
+        </div>
+      </a>
+
+      <a
+        href="https://stefandodds.ie/wildlife-sound/?mode=photo&type=PLANT"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card border-lime-100 p-6 transition hover:-translate-y-1 hover:shadow-xl"
+      >
+        <div className="text-5xl">🌿</div>
+
+        <h3 className="mt-4 text-xl font-semibold text-slate-900">
+          Plant Photo
+        </h3>
+
+        <p className="mt-2 text-slate-600">
+          Upload a plant photo and identify likely species using AI.
+        </p>
+
+        <div className="mt-4 font-medium text-lime-700">
+          Open Plant Analyser →
+        </div>
+      </a>
+
+      <div className="card border-slate-200 p-6 opacity-80">
+        <div className="text-5xl">🍄</div>
+
+        <h3 className="mt-4 text-xl font-semibold text-slate-900">
+          Mushroom ID
+        </h3>
+
+        <p className="mt-2 text-slate-600">
+          Photograph fungi and identify likely species.
+        </p>
+
+        <div className="mt-4 text-sm font-medium text-slate-500">
+          Coming Soon
+        </div>
+      </div>
+
+      <div className="card border-slate-200 p-6 opacity-80">
+        <div className="text-5xl">🐾</div>
+
+        <h3 className="mt-4 text-xl font-semibold text-slate-900">
+          Fauna Photo
+        </h3>
+
+        <p className="mt-2 text-slate-600">
+          Identify mammals, insects, reptiles and amphibians from images.
+        </p>
+
+        <div className="mt-4 text-sm font-medium text-slate-500">
+          Coming Soon
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
       </main>
     </div>
   );
